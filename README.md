@@ -2,6 +2,11 @@
 Curl like tool with AWS request signing
 
 
+## Installation
+  ```sh
+  $ pip install awscurl
+  ```
+
 ## Examples
 * Call AWS API Gateway: 
   ```sh
