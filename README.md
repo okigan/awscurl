@@ -3,8 +3,8 @@ Curl like tool with AWS request signing
 
 
 ## Overview 
-Requests to AWS API must be signed (see http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html) automates
-the process of signing and allows to make requests to AWS as simple as standard curl command.
+Requests to AWS API must be signed (see [Signing AWS API Requests](http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)) 
+automates the process of signing and allows to make requests to AWS as simple as standard curl command.
 
 
 ## Installation
