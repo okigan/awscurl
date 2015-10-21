@@ -22,3 +22,30 @@ automates the process of signing and allows to make requests to AWS as simple as
   ```sh
   $ awscurl --service ec2 -X GET  https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15
   ```
+
+## Options
+```
+awscurl --help 
+usage: awscurl [-h] [-v] [-X REQUEST] [-d DATA] [-H HEADER] [--region REGION]
+               [--service SERVICE] [--access_key ACCESS_KEY]
+               [--secret_key SECRET_KEY] [--security_token SECURITY_TOKEN]
+               uri
+
+positional arguments:
+  uri
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         verbose flag
+  -X REQUEST, --request REQUEST
+                        Specify request command to use
+  -d DATA, --data DATA  HTTP POST data
+  -H HEADER, --header HEADER
+                        HTTP POST data
+  --region REGION       AWS region
+  --service SERVICE     AWS service
+  --access_key ACCESS_KEY
+  --secret_key SECRET_KEY
+  --security_token SECURITY_TOKEN
+
+```
