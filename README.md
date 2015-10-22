@@ -1,5 +1,5 @@
 # awscurl
-Curl like tool with AWS request signing
+Curl like tool with AWS request signing. [![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
 
 
 ## Overview 
