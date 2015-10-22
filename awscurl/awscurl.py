@@ -2,14 +2,6 @@
 
 __author__ = 'iokulist'
 
-# AWS Version 4 signing example
-
-# EC2 API (DescribeRegions)
-
-# See: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
-# This version makes a GET request and passes the signature
-# in the Authorization header.
-
 import argparse
 import re
 import os
@@ -49,17 +41,25 @@ def url_path_to_dict(path):
 def make_request(method,
                  service,
                  region,
-                 args_uri,
+                 uri,
                  headers,
                  data,
                  access_key,
                  secret_key,
                  security_token):
-    uri = url_path_to_dict(args_uri)
-    host = uri['host']
-    endpoint = uri['schema'] + '://' + host + uri['path']
-    query = uri['query']
-    canonical_uri = uri['path']
+    """
+    # AWS Version 4 signing example
+
+    # EC2 API (DescribeRegions)
+
+    # See: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
+    # This version makes a GET request and passes the signature
+    # in the Authorization header.
+    """
+    uri_dict = url_path_to_dict(uri)
+    host = uri_dict['host']
+    query = uri_dict['query']
+    canonical_uri = uri_dict['path']
 
     # ************* REQUEST VALUES *************
     # method = 'GET'
@@ -171,7 +171,7 @@ def make_request(method,
     })
 
     # ************* SEND THE REQUEST *************
-    send_request(args_uri, data, headers, method)
+    send_request(uri, data, headers, method)
 
 
 def now():
@@ -193,8 +193,7 @@ def send_request(args_uri, data, headers, method):
 
 def main():
     default_headers = ['Accept: application/json',
-                       'Content-Type: application/json',
-                       ]
+                       'Content-Type: application/json']
 
     parser = argparse.ArgumentParser(description='Demo')
 
@@ -213,7 +212,8 @@ def main():
 
     args = parser.parse_args()
 
-    print args
+    if args.verbose:
+        print args
 
     data = args.data
 
@@ -235,12 +235,12 @@ def main():
     secret_key = args.secret_key
     token = args.security_token
 
-    args_uri = args.uri
+    uri = args.uri
 
     make_request(request,
                  service,
                  region,
-                 args_uri,
+                 uri,
                  headers,
                  data,
                  key,
