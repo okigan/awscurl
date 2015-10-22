@@ -11,4 +11,5 @@ python:
 # command to install dependencies
 install:
 # command to run tests
-script: python -m tests/test_make_request.py
+script: python -m tests.test_make_request
+
