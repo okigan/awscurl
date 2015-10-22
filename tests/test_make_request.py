@@ -58,7 +58,7 @@ class TestMakeRequest(TestCase):
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
-                  'args_uri': 'https://user:pass@host:123/path/?a=b&c=d',
+                  'uri': 'https://user:pass@host:123/path/?a=b&c=d',
                   'headers': headers,
                   'data': '',
                   'access_key': '',
