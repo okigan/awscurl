@@ -86,7 +86,7 @@ def make_request(method,
     # access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     # secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     if access_key is None or secret_key is None:
-        print 'No access key is available.'
+        print('No access key is available.')
         return
 
     # Create a date for headers and the credential string
@@ -179,16 +179,16 @@ def now():
 
 
 def send_request(args_uri, data, headers, method):
-    print '\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++'
-    print 'Request URL = ' + args_uri
+    print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
+    print('Request URL = ' + args_uri)
     r = None
     if method == 'GET':
         r = requests.get(args_uri, headers=headers)
     elif method == 'POST':
         r = requests.post(args_uri, headers=headers, data=data)
-    print '\nRESPONSE++++++++++++++++++++++++++++++++++++'
-    print 'Response code: %d\n' % r.status_code
-    print r.text
+    print('\nRESPONSE++++++++++++++++++++++++++++++++++++')
+    print('Response code: %d\n' % r.status_code)
+    print(r.text)
 
 
 def main():
@@ -213,7 +213,7 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        print args
+        print(args)
 
     data = args.data
 
