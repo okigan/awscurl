@@ -2,7 +2,8 @@
 
 __author__ = 'iokulist'
 
-import argparse
+# import argparse
+import configargparse
 import re
 import os
 import datetime
@@ -195,7 +196,10 @@ def main():
     default_headers = ['Accept: application/json',
                        'Content-Type: application/json']
 
-    parser = argparse.ArgumentParser(description='Demo')
+    parser = configargparse.ArgumentParser(
+        description='Curl AWS request signing',
+        formatter_class=configargparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose flag', )
     parser.add_argument('-X', '--request', help='Specify request command to use', )
@@ -204,9 +208,9 @@ def main():
 
     parser.add_argument('--region', help='AWS region', default='us-east-1')
     parser.add_argument('--service', help='AWS service', default='execute-api')
-    parser.add_argument('--access_key', default=os.environ.get('AWS_ACCESS_KEY_ID'))
-    parser.add_argument('--secret_key', default=os.environ.get('AWS_SECRET_ACCESS_KEY'))
-    parser.add_argument('--security_token', default=os.environ.get('AWS_SECURITY_TOKEN'))
+    parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
+    parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
+    parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
 
     parser.add_argument('uri')
 
