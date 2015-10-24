@@ -16,5 +16,5 @@ setup(name='awscurl',
           ],
       },
       zip_safe=False,
-      requires=['requests']
+      requires=['requests', 'configargparse']
       )
