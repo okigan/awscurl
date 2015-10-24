@@ -15,7 +15,7 @@ def my_mock_get():
         pass
 
     def ss(*args, **kargs):
-        print "in mock"
+        print("in mock")
         response = Object()
         response.status_code = 200
         response.text = 'some text'
@@ -29,7 +29,7 @@ def my_mock_send_request():
         pass
 
     def ss(*args, **kargs):
-        print "in mock"
+        print("in mock")
         response = Object()
         response.status_code = 200
         response.text = 'some text'
@@ -43,7 +43,7 @@ def my_mock_utcnow():
         pass
 
     def ss(*args, **kargs):
-        print "in mock"
+        print("in mock")
         return datetime.datetime.utcfromtimestamp(0)
 
     return ss
