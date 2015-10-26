@@ -48,7 +48,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose         verbose flag (default: False)
   -X REQUEST, --request REQUEST
-                        Specify request command to use (default: None)
+                        Specify request command to use (default: GET)
   -d DATA, --data DATA  HTTP POST data (default: )
   -H HEADER, --header HEADER
                         HTTP POST data (default: None)
