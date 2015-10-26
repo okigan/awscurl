@@ -1,17 +1,21 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 __author__ = 'iokulist'
 
 # import argparse
-import configargparse
 import re
-import os
 import datetime
 import hashlib
 import hmac
 import sys
 
+import configargparse
 import requests
+
+
+def log(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 
 def url_path_to_dict(path):
@@ -87,7 +91,7 @@ def make_request(method,
     # access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     # secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     if access_key is None or secret_key is None:
-        print('No access key is available.')
+        log('No access key is available.')
         return
 
     # Create a date for headers and the credential string
@@ -108,8 +112,9 @@ def make_request(method,
     # request parameters are in the query string. Query string values must
     # be URL-encoded (space=%20). The parameters must be sorted by name.
     # For this example, the query string is pre-formatted in the request_parameters variable.
-    canonical_querystring = query if query is not None else ''
-
+    query_sorted = sorted(map(str.strip, s.split("=")) for s in query.split('&') if len(s) > 0)
+    canonical_querystring = '&'.join('%s=%s' % (p[0], p[1] if len(p) > 1 else '') for p in query_sorted)
+    log(canonical_querystring)
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
@@ -166,9 +171,10 @@ def make_request(method,
     # earlier. Order here is not significant.
     # Python note: The 'host' header is added automatically by the Python 'requests' library.
     headers.update({
-        'x-amz-date': amzdate,
         'Authorization': authorization_header,
-        'x-amz-security-token': security_token
+        'x-amz-date': amzdate,
+        'x-amz-security-token': security_token,
+        'x-amz-content-sha256': payload_hash
     })
 
     # ************* SEND THE REQUEST *************
@@ -179,22 +185,22 @@ def now():
     return datetime.datetime.utcnow()
 
 
-def send_request(args_uri, data, headers, method):
-    print('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
-    print('Request URL = ' + args_uri)
-    r = None
-    if method == 'GET':
-        r = requests.get(args_uri, headers=headers)
-    elif method == 'POST':
-        r = requests.post(args_uri, headers=headers, data=data)
-    print('\nRESPONSE++++++++++++++++++++++++++++++++++++')
-    print('Response code: %d\n' % r.status_code)
-    print(r.text)
+def send_request(uri, data, headers, method):
+    log('\nHEADERS++++++++++++++++++++++++++++++++++++')
+    log(headers)
+
+    log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
+    log('Request URL = ' + uri)
+
+    r = requests.request(method, uri, headers=headers, data=data)
+
+    log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
+    log('Response code: %d\n' % r.status_code)
+    print(r.content)
 
 
 def main():
-    default_headers = ['Accept: application/json',
-                       'Content-Type: application/json']
+    default_headers = ['Accept: application/xml', 'Content-Type: application/json']
 
     parser = configargparse.ArgumentParser(
         description='Curl AWS request signing',
@@ -202,7 +208,7 @@ def main():
     )
 
     parser.add_argument('-v', '--verbose', action='store_true', help='verbose flag', )
-    parser.add_argument('-X', '--request', help='Specify request command to use', )
+    parser.add_argument('-X', '--request', help='Specify request command to use', default='GET')
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP POST data', action='append')
 
@@ -217,14 +223,15 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        print(args)
+        log(args)
+        # log(args)
 
     data = args.data
 
-    if data is not None and data.startswith("@"):
-        filename = data[1:]
-        with open(filename, "r") as f:
-            data = f.read()
+    # if data is not None and data.startswith("@"):
+    #     filename = data[1:]
+    #     with open(filename, "r") as f:
+    #         data = f.read()
 
     if args.header is None:
         args.header = default_headers

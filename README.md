@@ -13,16 +13,22 @@ automates the process of signing and allows to make requests to AWS as simple as
   ```
 
 ## Examples
-* Call AWS API Gateway: 
+* Call S3:
+ List bucket content
   ```sh
-  $ awscurl --service execute-api -X POST -d @request.json \
-    https://<yourhost>.execute-api.us-east-1.amazonaws.com/<your resource>
+  $ awscurl.py --serS3vice s3 https://okigan-lambdapics.s3.amazonaws.com
   ```
-  
-* Call AWS EC2: 
+
+* Call EC2: 
   ```sh
   $ awscurl --service ec2 -X GET \
     https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15
+  ```
+
+* Call API Gateway: 
+  ```sh
+  $ awscurl --service execute-api -X POST -d @request.json \
+    https://<yourhost>.execute-api.us-east-1.amazonaws.com/<your resource>
   ```
 
 ## Options
