@@ -13,16 +13,21 @@ automates the process of signing and allows to make requests to AWS as simple as
   ```
 
 ## Examples
-* Call AWS API Gateway: 
+* Call S3:
+ List bucket content
+  ```sh
+  $ awscurl.py --service s3 https://okigan-lambdapics.s3.amazonaws.com
+  ```
+
+* Call EC2: 
+  ```sh
+  $ awscurl --service ec2 'https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15'
+  ```
+
+* Call API Gateway: 
   ```sh
   $ awscurl --service execute-api -X POST -d @request.json \
     https://<yourhost>.execute-api.us-east-1.amazonaws.com/<your resource>
-  ```
-  
-* Call AWS EC2: 
-  ```sh
-  $ awscurl --service ec2 -X GET \
-    https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15
   ```
 
 ## Options
@@ -43,7 +48,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose         verbose flag (default: False)
   -X REQUEST, --request REQUEST
-                        Specify request command to use (default: None)
+                        Specify request command to use (default: GET)
   -d DATA, --data DATA  HTTP POST data (default: )
   -H HEADER, --header HEADER
                         HTTP POST data (default: None)
