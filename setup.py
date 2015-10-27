@@ -3,7 +3,7 @@ __author__ = 'iokulist'
 from setuptools import setup
 
 setup(name='awscurl',
-      version='0.3',
+      version='0.4',
       description='Curl like tool with AWS request signing',
       url='http://github.com/okigan/awscurl',
       author='Igor Okulist',
