@@ -1,5 +1,5 @@
 # awscurl
-Curl like tool with AWS request signing. [![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
+Curl like tool with AWS Signature Version 4 request signing. [![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
 
 
 ## Overview 
@@ -27,7 +27,7 @@ automates the process of signing and allows to make requests to AWS as simple as
 * Call API Gateway: 
   ```sh
   $ awscurl --service execute-api -X POST -d @request.json \
-    https://<yourhost>.execute-api.us-east-1.amazonaws.com/<your resource>
+    https://<prefix>.execute-api.us-east-1.amazonaws.com/<resource>
   ```
 
 ## Options
