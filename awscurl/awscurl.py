@@ -1,21 +1,22 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-__author__ = 'iokulist'
-
-# import argparse
 import re
 import datetime
 import hashlib
 import hmac
 import sys
+import pprint
 
 import configargparse
 import requests
 
+__author__ = 'iokulist'
+
 
 def log(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
+    pp = pprint.PrettyPrinter(stream=sys.stderr)
+    pp.pprint(*args, **kwargs)
 
 
 def url_path_to_dict(path):
@@ -53,46 +54,45 @@ def make_request(method,
                  secret_key,
                  security_token):
     """
-    # AWS Version 4 signing example
+    # Make HTTP request with AWS Version 4 signing
 
-    # EC2 API (DescribeRegions)
+    :param method: str
+    :param service: str
+    :param region: str
+    :param uri: str
+    :param headers: dict
+    :param data:str
+    :param access_key: str
+    :param secret_key: str
+    :param security_token: str
 
-    # See: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
-    # This version makes a GET request and passes the signature
-    # in the Authorization header.
+    See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
+
     uri_dict = url_path_to_dict(uri)
     host = uri_dict['host']
     query = uri_dict['query']
     canonical_uri = uri_dict['path']
 
-    # ************* REQUEST VALUES *************
-    # method = 'GET'
-    # service = 'ec2'
-    # host = 'ec2.amazonaws.com'
-    # region = 'us-east-1'
-    # endpoint = 'https://ec2.amazonaws.com'
-    # request_parameters = 'Action=DescribeRegions&Version=2013-10-15'
-
-    # Key derivation functions. See:
-    # http://docs.aws.amazon.com/general/latest/gr/signature-v4-examples.html#signature-v4-examples-python
     def sign(key, msg):
+        """
+        Key derivation functions.
+        See: http://docs.aws.amazon.com
+        /general/latest/gr/signature-v4-examples.html
+        #signature-v4-examples-python
+        """
         return hmac.new(key, msg.encode('utf-8'), hashlib.sha256).digest()
 
-    def getSignatureKey(key, dateStamp, regionName, serviceName):
-        kDate = sign(('AWS4' + key).encode('utf-8'), dateStamp)
-        kRegion = sign(kDate, regionName)
-        kService = sign(kRegion, serviceName)
-        kSigning = sign(kService, 'aws4_request')
-        return kSigning
+    def get_signature_key(key, date_stamp, region_name, service_name):
+        k_date = sign(('AWS4' + key).encode('utf-8'), date_stamp)
+        k_region = sign(k_date, region_name)
+        k_service = sign(k_region, service_name)
+        k_signing = sign(k_service, 'aws4_request')
+        return k_signing
 
-    # Read AWS access key from env. variables or configuration file. Best practice is NOT
-    # to embed credentials in code.
-    # access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-    # secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
     if access_key is None or secret_key is None:
         log('No access key is available.')
-        return
+        return 1
 
     # Create a date for headers and the credential string
     t = now()
@@ -108,12 +108,13 @@ def make_request(method,
     # string (use '/' if no path)
     # canonical_uri = '/'
 
-    # Step 3: Create the canonical query string. In this example (a GET request),
+    # Step 3: Create the canonical query string. In this example (a GET
+    # request),
     # request parameters are in the query string. Query string values must
     # be URL-encoded (space=%20). The parameters must be sorted by name.
-    # For this example, the query string is pre-formatted in the request_parameters variable.
-    query_sorted = sorted(map(str.strip, s.split("=")) for s in query.split('&') if len(s) > 0)
-    canonical_querystring = '&'.join('%s=%s' % (p[0], p[1] if len(p) > 1 else '') for p in query_sorted)
+    # For this example, the query string is pre-formatted in the
+    # request_parameters variable.
+    canonical_querystring = normalize_query_string(query)
     log(canonical_querystring)
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
@@ -132,44 +133,51 @@ def make_request(method,
     payload_hash = hashlib.sha256(data).hexdigest()
 
     # Step 7: Combine elements to create create canonical request
-    canonical_request = method + '\n' + \
-                        canonical_uri + '\n' + \
-                        canonical_querystring + '\n' + \
-                        canonical_headers + '\n' + \
-                        signed_headers + '\n' + \
-                        payload_hash
+    canonical_request = (method + '\n' +
+                         canonical_uri + '\n' +
+                         canonical_querystring + '\n' +
+                         canonical_headers + '\n' +
+                         signed_headers + '\n' +
+                         payload_hash)
 
     # ************* TASK 2: CREATE THE STRING TO SIGN*************
     # Match the algorithm to the hashing algorithm you use, either SHA-1 or
     # SHA-256 (recommended)
     algorithm = 'AWS4-HMAC-SHA256'
-    credential_scope = datestamp + '/' + region + '/' + service + '/' + 'aws4_request'
-    string_to_sign = algorithm + '\n' + \
-                     amzdate + '\n' + \
-                     credential_scope + '\n' + \
-                     hashlib.sha256(canonical_request).hexdigest()
+    credential_scope = (datestamp + '/' +
+                        region + '/' +
+                        service + '/' +
+                        'aws4_request')
+    string_to_sign = (algorithm + '\n' +
+                      amzdate + '\n' +
+                      credential_scope + '\n' +
+                      hashlib.sha256(canonical_request).hexdigest())
 
     # ************* TASK 3: CALCULATE THE SIGNATURE *************
     # Create the signing key using the function defined above.
-    signing_key = getSignatureKey(secret_key, datestamp, region, service)
+    signing_key = get_signature_key(secret_key, datestamp, region, service)
 
     # Sign the string_to_sign using the signing_key
-    signature = hmac.new(signing_key, (string_to_sign).encode('utf-8'), hashlib.sha256).hexdigest()
+    encoded = string_to_sign.encode('utf-8')
+    signature = hmac.new(signing_key, encoded, hashlib.sha256).hexdigest()
 
-    # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
+    # ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST ***********
     # The signing information can be either in a query string value or in
     # a header named Authorization. This code shows how to use a header.
     # Create authorization header and add to request headers
-    authorization_header = algorithm + ' ' + \
-                           'Credential=' + access_key + '/' + credential_scope + ', ' + \
-                           'SignedHeaders=' + signed_headers + ', ' + \
-                           'Signature=' + signature
+    authorization_header = (
+        algorithm + ' ' +
+        'Credential=' + access_key + '/' + credential_scope + ', ' +
+        'SignedHeaders=' + signed_headers + ', ' +
+        'Signature=' + signature
+    )
 
-    # The request can include any headers, but MUST include "host", "x-amz-date",
-    # and (for this scenario) "Authorization". "host" and "x-amz-date" must
-    # be included in the canonical_headers and signed_headers, as noted
-    # earlier. Order here is not significant.
-    # Python note: The 'host' header is added automatically by the Python 'requests' library.
+    # The request can include any headers, but MUST include "host",
+    # "x-amz-date", and (for this scenario) "Authorization". "host" and
+    # "x-amz-date" must be included in the canonical_headers and
+    # signed_headers, as noted earlier. Order here is not significant.
+    # Python note: The 'host' header is added automatically by the Python
+    # 'requests' library.
     headers.update({
         'Authorization': authorization_header,
         'x-amz-date': amzdate,
@@ -177,8 +185,17 @@ def make_request(method,
         'x-amz-content-sha256': payload_hash
     })
 
-    # ************* SEND THE REQUEST *************
-    send_request(uri, data, headers, method)
+    return send_request(uri, data, headers, method)
+
+
+def normalize_query_string(query):
+    kv = (map(str.strip, s.split("="))
+          for s in query.split('&')
+          if len(s) > 0)
+
+    normalized = '&'.join('%s=%s' % (p[0], p[1] if len(p) > 1 else '')
+                          for p in sorted(kv))
+    return normalized
 
 
 def now():
@@ -198,22 +215,33 @@ def send_request(uri, data, headers, method):
     log('Response code: %d\n' % r.status_code)
     print(r.content)
 
+    r.raise_for_status()
+
+    return 0
+
 
 def main():
-    default_headers = ['Accept: application/xml', 'Content-Type: application/json']
+    # note EC2 ignores Accept header and responds in xml
+    default_headers = ['Accept: application/xml',
+                       'Content-Type: application/json']
 
     parser = configargparse.ArgumentParser(
         description='Curl AWS request signing',
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter
     )
 
-    parser.add_argument('-v', '--verbose', action='store_true', help='verbose flag', )
-    parser.add_argument('-X', '--request', help='Specify request command to use', default='GET')
+    parser.add_argument('-v', '--verbose', action='store_true',
+                        help='verbose flag', default=False)
+    parser.add_argument('-X', '--request',
+                        help='Specify request command to use',
+                        default='GET')
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
-    parser.add_argument('-H', '--header', help='HTTP POST data', action='append')
+    parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
     parser.add_argument('--region', help='AWS region', default='us-east-1')
-    parser.add_argument('--service', help='AWS service', default='execute-api')
+    parser.add_argument('--service',
+                        help='AWS service',
+                        default='execute-api')
     parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
     parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
     parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
@@ -223,41 +251,30 @@ def main():
     args = parser.parse_args()
 
     if args.verbose:
-        log(args)
-        # log(args)
+        log(vars(parser.parse_args()))
 
     data = args.data
 
-    # if data is not None and data.startswith("@"):
-    #     filename = data[1:]
-    #     with open(filename, "r") as f:
-    #         data = f.read()
+    if data is not None and data.startswith("@"):
+        filename = data[1:]
+        with open(filename, "r") as f:
+            data = f.read()
 
     if args.header is None:
         args.header = default_headers
 
-    headers = dict(s.split(": ") for s in args.header)
+    headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
 
-    request = args.request
-    service = args.service
-    region = args.region
-
-    key = args.access_key
-    secret_key = args.secret_key
-    token = args.security_token
-
-    uri = args.uri
-
-    make_request(request,
-                 service,
-                 region,
-                 uri,
-                 headers,
-                 data,
-                 key,
-                 secret_key,
-                 token
-                 )
+    return make_request(args.request,
+                        args.service,
+                        args.region,
+                        args.uri,
+                        headers,
+                        data,
+                        args.access_key,
+                        args.secret_key,
+                        args.security_token
+                        )
 
 
 if __name__ == '__main__':

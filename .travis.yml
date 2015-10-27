@@ -9,7 +9,11 @@ python:
 #  - "3.5-dev" # 3.5 development branch
   - "nightly" # currently points to 3.6-dev
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install:
+  - pip install -r requirements.txt
+  - pip install pep8
 # command to run tests
-script: python -m tests.test_make_request
+script:
+  - pep8 awscurl
+  - python -m tests.test_make_request
 
