@@ -15,5 +15,6 @@ install:
 # command to run tests
 script:
   - pep8 awscurl
+#  - pandoc --from=markdown --to=rst --output=README.rst README.md
   - python -m tests.test_make_request
 
