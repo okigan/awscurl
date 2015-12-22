@@ -120,11 +120,12 @@ def make_request(method,
 
     fullhost = host
     if port:
-      fullhost = host + ':' + port
+        fullhost = host + ':' + port
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
-    canonical_headers = 'host:' + fullhost + '\n' + 'x-amz-date:' + amzdate + '\n'
+    canonical_headers = ('host:' + fullhost + '\n' +
+                         'x-amz-date:' + amzdate + '\n')
 
     # Step 5: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -145,7 +146,7 @@ def make_request(method,
                          signed_headers + '\n' +
                          payload_hash)
 
-    log('\nCANONICAL REQUEST = ' + canonical_request )
+    log('\nCANONICAL REQUEST = ' + canonical_request)
     # ************* TASK 2: CREATE THE STRING TO SIGN*************
     # Match the algorithm to the hashing algorithm you use, either SHA-1 or
     # SHA-256 (recommended)
@@ -159,7 +160,7 @@ def make_request(method,
                       credential_scope + '\n' +
                       hashlib.sha256(canonical_request).hexdigest())
 
-    log('\nSTRING_TO_SIGN = ' + string_to_sign )
+    log('\nSTRING_TO_SIGN = ' + string_to_sign)
     # ************* TASK 3: CALCULATE THE SIGNATURE *************
     # Create the signing key using the function defined above.
     signing_key = get_signature_key(secret_key, datestamp, region, service)
