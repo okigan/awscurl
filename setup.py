@@ -19,6 +19,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'requests',
-        'configargparse'
+        'configargparse',
+        'urllib3[secure]'
     ]
 )
