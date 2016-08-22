@@ -1,9 +1,10 @@
-# awscurl
-Curl like tool with AWS Signature Version 4 request signing. [![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
+# awscurl [![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
+
+Curl like tool with AWS Signature Version 4 request signing.
 
 
-## Overview 
-Requests to AWS API must be signed (see [Signing AWS API Requests](http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html)) 
+## Overview
+Requests to AWS API must be signed (see [Signing AWS API Requests](http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html))
 automates the process of signing and allows to make requests to AWS as simple as standard curl command.
 
 
@@ -16,15 +17,15 @@ automates the process of signing and allows to make requests to AWS as simple as
 * Call S3:
  List bucket content
   ```sh
-  $ awscurl.py --service s3 https://okigan-lambdapics.s3.amazonaws.com
+  $ awscurl --service s3 https://okigan-lambdapics.s3.amazonaws.com
   ```
 
-* Call EC2: 
+* Call EC2:
   ```sh
   $ awscurl --service ec2 'https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15'
   ```
 
-* Call API Gateway: 
+* Call API Gateway:
   ```sh
   $ awscurl --service execute-api -X POST -d @request.json \
     https://<prefix>.execute-api.us-east-1.amazonaws.com/<resource>
@@ -32,7 +33,7 @@ automates the process of signing and allows to make requests to AWS as simple as
 
 ## Options
 ```
-usage: awscurl.py [-h] [-v] [-X REQUEST] [-d DATA] [-H HEADER]
+usage: awscurl [-h] [-v] [-X REQUEST] [-d DATA] [-H HEADER]
                   [--region REGION] [--service SERVICE]
                   [--access_key ACCESS_KEY] [--secret_key SECRET_KEY]
                   [--security_token SECURITY_TOKEN]
