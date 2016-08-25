@@ -35,6 +35,7 @@ automates the process of signing and allows to make requests to AWS as simple as
 ```
 usage: awscurl [-h] [-v] [-X REQUEST] [-d DATA] [-H HEADER]
                   [--region REGION] [--service SERVICE]
+                  [--profile AWS_PROFILE]
                   [--access_key ACCESS_KEY] [--secret_key SECRET_KEY]
                   [--security_token SECURITY_TOKEN]
                   uri
@@ -54,6 +55,7 @@ optional arguments:
   -H HEADER, --header HEADER
                         HTTP POST data (default: None)
   --region REGION       AWS region (default: us-east-1)
+  --profile PROFILE     [env var: AWS_PROFILE] (default: default)
   --service SERVICE     AWS service (default: execute-api)
   --access_key ACCESS_KEY
                         [env var: AWS_ACCESS_KEY_ID] (default: None)
@@ -63,3 +65,10 @@ optional arguments:
                         [env var: AWS_SECURITY_TOKEN] (default: None)
 
 ```
+
+If you do not specify the `--access_key` or `--secret_key`
+(or environment variables), `awscurl` will attempt to use
+the credentials you set in `~/.aws/credentials`. If you
+do not specify a `--profile` or `AWS_PROFILE`, `awscurl`
+uses `default`.
+
