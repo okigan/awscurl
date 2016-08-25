@@ -100,8 +100,9 @@ def make_request(method,
             config = configparser.ConfigParser()
             config.read(expanduser("~") + "/.aws/credentials")
 
-            access_key = config.get(profile, "aws_access_key_id")
-            secret_key = config.get(profile, "aws_secret_access_key")
+            access_key = access_key or config.get(profile, "aws_access_key_id")
+            secret_key = secret_key or config.get(profile,
+                                                  "aws_secret_access_key")
 
             if access_key is None or secret_key is None:
                 raise ValueError('No access key is available')
