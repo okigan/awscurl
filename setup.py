@@ -20,6 +20,7 @@ setup(
     install_requires=[
         'requests',
         'configargparse',
+        'configparser',
         'urllib3[secure]'
     ]
 )
