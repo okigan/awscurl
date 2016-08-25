@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
+from os.path import expanduser
 
 import re
 import datetime
@@ -9,6 +10,7 @@ import sys
 import pprint
 
 import configargparse
+import configparser
 import requests
 
 __author__ = 'iokulist'
@@ -50,6 +52,7 @@ def make_request(method,
                  uri,
                  headers,
                  data,
+                 profile,
                  access_key,
                  secret_key,
                  security_token):
@@ -62,6 +65,7 @@ def make_request(method,
     :param uri: str
     :param headers: dict
     :param data:str
+    :param profile: str
     :param access_key: str
     :param secret_key: str
     :param security_token: str
@@ -92,8 +96,25 @@ def make_request(method,
         return k_signing
 
     if access_key is None or secret_key is None:
-        log('No access key is available.')
-        return 1
+        try:
+            config = configparser.ConfigParser()
+            config.read(expanduser("~") + "/.aws/credentials")
+
+            access_key = config.get(profile, "aws_access_key_id")
+            secret_key = config.get(profile, "aws_secret_access_key")
+
+            if access_key is None or secret_key is None:
+                raise ValueError('No access key is available')
+        except configparser.NoSectionError:
+            log('AWS profile \'{0}\' not found'.format(profile))
+            return 1
+        except configparser.NoOptionError:
+            log('AWS profile \'{0}\' is missing access or secret key'
+                .format(profile))
+            return 1
+        except ValueError as error:
+            log(error)
+            return 1
 
     # Create a date for headers and the credential string
     t = now()
@@ -247,6 +268,10 @@ def main():
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
     parser.add_argument('--region', help='AWS region', default='us-east-1')
+    parser.add_argument('--profile',
+                        help='AWS profile',
+                        default='default',
+                        env_var='AWS_PROFILE')
     parser.add_argument('--service',
                         help='AWS service',
                         default='execute-api')
@@ -279,6 +304,7 @@ def main():
                         args.uri,
                         headers,
                         data,
+                        args.profile,
                         args.access_key,
                         args.secret_key,
                         args.security_token
