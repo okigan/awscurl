@@ -12,6 +12,11 @@ automates the process of signing and allows to make requests to AWS as simple as
   ```sh
   $ pip install awscurl
   ```
+  
+#### Installation from source (bleeding edge)
+  ```sh
+  $ pip install git+https://github.com/okigan/awscurl
+  ```
 
 ## Examples
 * Call S3:
