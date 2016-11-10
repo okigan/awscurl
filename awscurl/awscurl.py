@@ -149,12 +149,18 @@ def make_request(method,
     canonical_headers = ('host:' + fullhost + '\n' +
                          'x-amz-date:' + amzdate + '\n')
 
+    if security_token:
+        canonical_headers += ('x-amz-security-token:' + security_token + '\n')
+
     # Step 5: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
     # Note: The request can include any headers; canonical_headers and
     # signed_headers lists those that you want to be included in the
     # hash of the request. "Host" and "x-amz-date" are always required.
     signed_headers = 'host;x-amz-date'
+
+    if security_token:
+        signed_headers += ';x-amz-security-token'
 
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
