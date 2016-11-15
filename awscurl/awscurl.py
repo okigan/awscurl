@@ -13,6 +13,8 @@ import configargparse
 import configparser
 import requests
 
+from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
+
 __author__ = 'iokulist'
 
 
@@ -94,6 +96,17 @@ def make_request(method,
         k_service = sign(k_region, service_name)
         k_signing = sign(k_service, 'aws4_request')
         return k_signing
+
+    # Try and get credentials from an IAM Instance Profile via STS
+    if access_key is None or secret_key is None:
+        provider = InstanceMetadataProvider(
+            iam_role_fetcher=InstanceMetadataFetcher()
+        )
+        creds = provider.load()
+        if creds:
+            access_key = creds.access_key
+            secret_key = creds.secret_key
+            security_token = creds.token
 
     if access_key is None or secret_key is None:
         try:
