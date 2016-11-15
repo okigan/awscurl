@@ -13,7 +13,10 @@ import configargparse
 import configparser
 import requests
 
-from botocore.credentials import InstanceMetadataProvider, InstanceMetadataFetcher
+from botocore.credentials import (
+    InstanceMetadataProvider,
+    InstanceMetadataFetcher
+)
 
 __author__ = 'iokulist'
 
