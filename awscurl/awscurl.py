@@ -285,6 +285,7 @@ def main():
     parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
     parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
     parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
+    parser.add_argument('--session_token', env_var='AWS_SESSION_TOKEN')
 
     parser.add_argument('uri')
 
@@ -314,7 +315,7 @@ def main():
                         args.profile,
                         args.access_key,
                         args.secret_key,
-                        args.security_token
+                        args.security_token or args.session_token
                         )
 
 
