@@ -98,6 +98,9 @@ def make_request(method,
         k_signing = sign(k_service, 'aws4_request')
         return k_signing
 
+    def sha256_hash(val):
+        return hashlib.sha256(val.encode('utf-8')).hexdigest()
+
     if access_key is None or secret_key is None:
         try:
             config = configparser.ConfigParser()
@@ -167,7 +170,7 @@ def make_request(method,
 
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
-    payload_hash = hashlib.sha256(data).hexdigest()
+    payload_hash = sha256_hash(data)
 
     # Step 7: Combine elements to create create canonical request
     canonical_request = (method + '\n' +
@@ -189,7 +192,7 @@ def make_request(method,
     string_to_sign = (algorithm + '\n' +
                       amzdate + '\n' +
                       credential_scope + '\n' +
-                      hashlib.sha256(canonical_request).hexdigest())
+                      sha256_hash(canonical_request))
 
     log('\nSTRING_TO_SIGN = ' + string_to_sign)
     # ************* TASK 3: CALCULATE THE SIGNATURE *************
