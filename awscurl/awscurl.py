@@ -17,6 +17,7 @@ __author__ = 'iokulist'
 
 is_verbose = False
 
+
 def log(*args, **kwargs):
     if not is_verbose:
         return
