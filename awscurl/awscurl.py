@@ -15,8 +15,11 @@ import requests
 
 __author__ = 'iokulist'
 
+is_verbose = False
 
 def log(*args, **kwargs):
+    if not is_verbose:
+        return
     pp = pprint.PrettyPrinter(stream=sys.stderr)
     pp.pprint(*args, **kwargs)
 
@@ -290,6 +293,8 @@ def main():
     parser.add_argument('uri')
 
     args = parser.parse_args()
+    global is_verbose
+    is_verbose = args.verbose
 
     if args.verbose:
         log(vars(parser.parse_args()))
