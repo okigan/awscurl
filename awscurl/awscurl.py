@@ -277,7 +277,10 @@ def main():
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
-    parser.add_argument('--region', help='AWS region', default='us-east-1')
+    parser.add_argument('--region',
+                        help='AWS region',
+                        default='us-east-1',
+                        env_var='AWS_DEFAULT_REGION')
     parser.add_argument('--profile',
                         help='AWS profile',
                         default='default',
