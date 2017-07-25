@@ -16,5 +16,6 @@ install:
 # command to run tests
 script:
   - pep8 awscurl
-  - python -m tests.test_make_request
+  - python -m tests.unit_test
+  - python -m tests.integration_test
 

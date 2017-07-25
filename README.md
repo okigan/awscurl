@@ -22,7 +22,7 @@ automates the process of signing and allows to make requests to AWS as simple as
 * Call S3:
  List bucket content
   ```sh
-  $ awscurl --service s3 https://okigan-lambdapics.s3.amazonaws.com
+  $ awscurl --service s3 https://awscurl-sample-bucket.s3.amazonaws.com
   ```
 
 * Call EC2:
