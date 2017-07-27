@@ -228,7 +228,7 @@ def make_request(method,
 
 
 def normalize_query_string(query):
-    kv = (map(str.strip, s.split("="))
+    kv = (list(map(str.strip, s.split("=")))
           for s in query.split('&')
           if len(s) > 0)
 
