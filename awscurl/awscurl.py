@@ -256,7 +256,7 @@ def send_request(uri, data, headers, method):
 
     log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     log('Response code: %d\n' % r.status_code)
-    print(r.content)
+    print(r.text)
 
     r.raise_for_status()
 
