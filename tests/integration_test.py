@@ -5,6 +5,8 @@ import logging
 
 from unittest import TestCase
 
+from mock import patch
+
 from awscurl.awscurl import make_request
 
 __author__ = 'iokulist'
