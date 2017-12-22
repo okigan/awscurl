@@ -102,7 +102,7 @@ def make_request(method,
     def sha256_hash(val):
         return hashlib.sha256(val.encode('utf-8')).hexdigest()
 
-    if access_key is None or secret_key is None:
+    if access_key is None or secret_key is None or security_token is None:
         try:
             config = configparser.ConfigParser()
             config.read(expanduser("~") + "/.aws/credentials")
@@ -110,6 +110,9 @@ def make_request(method,
             access_key = access_key or config.get(profile, "aws_access_key_id")
             secret_key = secret_key or config.get(profile,
                                                   "aws_secret_access_key")
+            if config.has_option(profile, "aws_session_token"):
+                security_token = security_token or config.get(
+                    profile, "aws_session_token")
 
             if access_key is None or secret_key is None:
                 raise ValueError('No access key is available')
