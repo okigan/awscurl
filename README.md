@@ -18,6 +18,24 @@ automates the process of signing and allows to make requests to AWS as simple as
   $ pip install git+https://github.com/okigan/awscurl
   ```
 
+#### Installation via Docker
+Assumes Docker is installed and the working directory is project root of the cloned repo.  Result will be an image named `$USER/awscurl`.  
+
+  ```sh
+  $ docker build --rm -t $USER/awscurl .
+  ```
+
+On OS X run via a shell script in your $PATH or directly with something like the following:
+
+  ```sh
+#!/bin/bash
+
+export AWS_DIR="${AWS_DIR:-$HOME/.aws}"
+mkdir -p $AWS_DIR
+
+docker run --rm -it -v "$AWS_DIR:/root/.aws" "$USER/awscurl:latest" "$@"
+  ```
+
 ## Examples
 * Call S3:
  List bucket content
