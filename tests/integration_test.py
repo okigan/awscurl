@@ -24,11 +24,10 @@ class TestMakeRequestWithToken(TestCase):
                   'uri': 'https://awscurl-sample-bucket.s3.amazonaws.com/awscurl-sample-file:.txt?a=b',
                   'headers': headers,
                   'data': '',
-                  'profile': '',
                   'access_key': access_key,
                   'secret_key': secret_key,
                   'security_token': None}
 
-        make_request(**params)
+        r = make_request(**params)
 
-        pass
+        self.assertEqual(r.status_code, 200)

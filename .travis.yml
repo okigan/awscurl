@@ -7,6 +7,7 @@ python:
 #  - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7-dev"
 #  - "3.5-dev" # 3.5 development branch
 #  - "nightly" # currently points to 3.6-dev
 # command to install dependencies
@@ -16,5 +17,5 @@ install:
 # command to run tests
 script:
   - pycodestyle -v awscurl
-  - py.test
+  - py.test -v
 
