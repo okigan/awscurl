@@ -18,14 +18,14 @@ __author__ = 'iokulist'
 is_verbose = False
 
 
-def log(*args, **kwargs):
+def __log(*args, **kwargs):
     if not is_verbose:
         return
     pp = pprint.PrettyPrinter(stream=sys.stderr)
     pp.pprint(*args, **kwargs)
 
 
-def url_path_to_dict(path):
+def __url_path_to_dict(path):
     """http://stackoverflow.com/a/17892757/142207"""
 
     pattern = (r'^'
@@ -77,7 +77,7 @@ def make_request(method,
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
 
-    uri_dict = url_path_to_dict(uri)
+    uri_dict = __url_path_to_dict(uri)
     host = uri_dict['host']
     query = uri_dict['query']
     canonical_uri = uri_dict['path']
@@ -117,18 +117,18 @@ def make_request(method,
             if access_key is None or secret_key is None:
                 raise ValueError('No access key is available')
         except configparser.NoSectionError:
-            log('AWS profile \'{0}\' not found'.format(profile))
+            __log('AWS profile \'{0}\' not found'.format(profile))
             return 1
         except configparser.NoOptionError:
-            log('AWS profile \'{0}\' is missing access or secret key'
-                .format(profile))
+            __log('AWS profile \'{0}\' is missing access or secret key'
+                  .format(profile))
             return 1
         except ValueError as error:
-            log(error)
+            __log(error)
             return 1
 
     # Create a date for headers and the credential string
-    t = now()
+    t = __now()
     amzdate = t.strftime('%Y%m%dT%H%M%SZ')
     datestamp = t.strftime('%Y%m%d')  # Date w/o time, used in credential scope
 
@@ -147,8 +147,8 @@ def make_request(method,
     # be URL-encoded (space=%20). The parameters must be sorted by name.
     # For this example, the query string is pre-formatted in the
     # request_parameters variable.
-    canonical_querystring = normalize_query_string(query)
-    log(canonical_querystring)
+    canonical_querystring = __normalize_query_string(query)
+    __log(canonical_querystring)
 
     fullhost = host
     if port:
@@ -184,7 +184,7 @@ def make_request(method,
                          signed_headers + '\n' +
                          payload_hash)
 
-    log('\nCANONICAL REQUEST = ' + canonical_request)
+    __log('\nCANONICAL REQUEST = ' + canonical_request)
     # ************* TASK 2: CREATE THE STRING TO SIGN*************
     # Match the algorithm to the hashing algorithm you use, either SHA-1 or
     # SHA-256 (recommended)
@@ -198,7 +198,7 @@ def make_request(method,
                       credential_scope + '\n' +
                       sha256_hash(canonical_request))
 
-    log('\nSTRING_TO_SIGN = ' + string_to_sign)
+    __log('\nSTRING_TO_SIGN = ' + string_to_sign)
     # ************* TASK 3: CALCULATE THE SIGNATURE *************
     # Create the signing key using the function defined above.
     signing_key = get_signature_key(secret_key, datestamp, region, service)
@@ -231,10 +231,10 @@ def make_request(method,
         'x-amz-content-sha256': payload_hash
     })
 
-    return send_request(uri, data, headers, method)
+    return __send_request(uri, data, headers, method)
 
 
-def normalize_query_string(query):
+def __normalize_query_string(query):
     kv = (list(map(str.strip, s.split("=")))
           for s in query.split('&')
           if len(s) > 0)
@@ -244,21 +244,21 @@ def normalize_query_string(query):
     return normalized
 
 
-def now():
+def __now():
     return datetime.datetime.utcnow()
 
 
-def send_request(uri, data, headers, method):
-    log('\nHEADERS++++++++++++++++++++++++++++++++++++')
-    log(headers)
+def __send_request(uri, data, headers, method):
+    __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
+    __log(headers)
 
-    log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
-    log('Request URL = ' + uri)
+    __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
+    __log('Request URL = ' + uri)
 
     r = requests.request(method, uri, headers=headers, data=data)
 
-    log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
-    log('Response code: %d\n' % r.status_code)
+    __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
+    __log('Response code: %d\n' % r.status_code)
     print(r.text)
 
     r.raise_for_status()
@@ -307,7 +307,7 @@ def main():
     is_verbose = args.verbose
 
     if args.verbose:
-        log(vars(parser.parse_args()))
+        __log(vars(parser.parse_args()))
 
     data = args.data
 
