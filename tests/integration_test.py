@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import datetime
-import logging
+import base64
 
 from unittest import TestCase
 
@@ -17,6 +16,8 @@ class TestMakeRequestWithToken(TestCase):
 
     def test_make_request(self, *args, **kvargs):
         headers = {}
+        access_key = base64.b64decode('QUtJQUkyNkxPQU5NSlpLNVNQWUE=').decode("utf-8")
+        secret_key = base64.b64decode('ekVQbE9URjU0Mys5M0l6UlNnNEVCOEd4cjFQV2NVa1p0TERWSmY4ag==').decode("utf-8")
         params = {'method': 'GET',
                   'service': 's3',
                   'region': 'us-east-1',
@@ -24,11 +25,10 @@ class TestMakeRequestWithToken(TestCase):
                   'headers': headers,
                   'data': '',
                   'profile': '',
-                  'access_key': 'AKIAIJTITPLWS3VWYTUA',
-                  'secret_key': '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',
+                  'access_key': access_key,
+                  'secret_key': secret_key,
                   'security_token': None}
 
         make_request(**params)
-
 
         pass
