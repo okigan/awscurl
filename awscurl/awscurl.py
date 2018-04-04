@@ -178,7 +178,7 @@ def make_request(method,
 
     # Step 7: Combine elements to create create canonical request
     canonical_request = (method + '\n' +
-                         canonical_uri + '\n' +
+                         requests.utils.quote(canonical_uri) + '\n' +
                          canonical_querystring + '\n' +
                          canonical_headers + '\n' +
                          signed_headers + '\n' +
