@@ -65,7 +65,6 @@ class TestMakeRequest(TestCase):
                   'uri': 'https://user:pass@host:123/path/?a=b&c=d',
                   'headers': headers,
                   'data': '',
-                  'profile': '',
                   'access_key': '',
                   'secret_key': '',
                   'security_token': ''}
@@ -95,7 +94,6 @@ class TestMakeRequestWithToken(TestCase):
                   'uri': 'https://user:pass@host:123/path/?a=b&c=d',
                   'headers': headers,
                   'data': '',
-                  'profile': '',
                   'access_key': 'ABC',
                   'secret_key': 'DEF',
                   'security_token': 'GHI'}
