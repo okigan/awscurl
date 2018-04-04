@@ -24,8 +24,8 @@ class TestMakeRequestWithToken(TestCase):
                   'headers': headers,
                   'data': '',
                   'profile': '',
-                  'access_key': 'AKIAIKDYYMAAECYXKVZQ',
-                  'secret_key': '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',
+                  'access_key': 'AKIAIJTITPLWS3VWYTUA',
+                  'secret_key': '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',
                   'security_token': None}
 
         make_request(**params)
