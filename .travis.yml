@@ -15,6 +15,6 @@ install:
   - pip install -r requirements-test.txt
 # command to run tests
 script:
-  - pep8 awscurl
+  - pycodestyle -v awscurl
   - py.test
 
