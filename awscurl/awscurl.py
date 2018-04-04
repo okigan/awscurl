@@ -1,16 +1,16 @@
 #!/usr/bin/env python
 from __future__ import print_function
-from os.path import expanduser
 
-import re
+import configparser
 import datetime
 import hashlib
 import hmac
-import sys
+import os
 import pprint
+import re
+import sys
 
 import configargparse
-import configparser
 import requests
 
 __author__ = 'iokulist'
@@ -238,6 +238,41 @@ def __send_request(uri, data, headers, method):
     return r
 
 
+def load_aws_config(access_key, secret_key, security_token, credentials_path, profile):
+    if access_key is None or secret_key is None or security_token is None:
+        try:
+            config = configparser.ConfigParser()
+            config.read(credentials_path)
+
+            while True:
+                if access_key is None and config.has_option(profile, "aws_access_key_id"):
+                    access_key = config.get(profile, "aws_access_key_id")
+                else:
+                    break
+
+                if secret_key is None and config.has_option(profile, "aws_secret_access_key"):
+                    secret_key = config.get(profile, "aws_secret_access_key")
+                else:
+                    break
+
+                if security_token is None and config.has_option(profile, "aws_session_token"):
+                    security_token = config.get(profile, "aws_session_token")
+
+                break
+
+        except configparser.NoSectionError as e:
+            __log('AWS profile \'{0}\' not found'.format(e.args))
+            raise e
+        except configparser.NoOptionError as e:
+            __log('AWS profile \'{0}\' is missing \'{1}\''.format(profile, e.args))
+            raise e
+        except ValueError as e:
+            __log(e)
+            raise e
+
+    return access_key, secret_key, security_token
+
+
 def main():
     # note EC2 ignores Accept header and responds in xml
     default_headers = ['Accept: application/xml',
@@ -256,17 +291,9 @@ def main():
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
-    parser.add_argument('--region',
-                        help='AWS region',
-                        default='us-east-1',
-                        env_var='AWS_DEFAULT_REGION')
-    parser.add_argument('--profile',
-                        help='AWS profile',
-                        default='default',
-                        env_var='AWS_PROFILE')
-    parser.add_argument('--service',
-                        help='AWS service',
-                        default='execute-api')
+    parser.add_argument('--region', help='AWS region', default='us-east-1', env_var='AWS_DEFAULT_REGION')
+    parser.add_argument('--profile', help='AWS profile', default='default', env_var='AWS_PROFILE')
+    parser.add_argument('--service', help='AWS service', default='execute-api')
     parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
     parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
     parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
@@ -293,27 +320,12 @@ def main():
 
     headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
 
-    # TODO: this needs to be factored out
-    if args.access_key is None or args.secret_key is None or args.security_token is None:
-        try:
-            config = configparser.ConfigParser()
-            config.read(expanduser("~") + "/.aws/credentials")
-
-            args.access_key = args.access_key or config.get(args.profile, "aws_access_key_id")
-            args.secret_key = args.secret_key or config.get(args.profile, "aws_secret_access_key")
-
-            if config.has_option(args.profile, "aws_session_token"):
-                args.security_token = args.security_token or config.get(args.profile, "aws_session_token")
-
-        except configparser.NoSectionError:
-            __log('AWS profile \'{0}\' not found'.format(args.profile))
-            return 1
-        except configparser.NoOptionError:
-            __log('AWS profile \'{0}\' is missing access or secret key'.format(args.profile))
-            return 1
-        except ValueError as error:
-            __log(error)
-            return 1
+    credentials_path = os.path.expanduser("~") + "/.aws/credentials"
+    args.access_key, args.secret_key, args.security_token = load_aws_config(args.access_key,
+                                                                            args.secret_key,
+                                                                            args.security_token,
+                                                                            credentials_path,
+                                                                            args.profile)
 
     if args.access_key is None:
         raise ValueError('No access key is available')
