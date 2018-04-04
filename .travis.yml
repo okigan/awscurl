@@ -12,10 +12,9 @@ python:
 # command to install dependencies
 install:
   - pip install -r requirements.txt
-  - pip install pep8
+  - pip install -r requirements-test.txt
 # command to run tests
 script:
   - pep8 awscurl
-  - python -m tests.unit_test
-  - python -m tests.integration_test
+  - py.test
 
