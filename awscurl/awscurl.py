@@ -56,13 +56,13 @@ def make_request(method,
                  uri,
                  headers,
                  data,
-                 profile,
                  access_key,
                  secret_key,
                  security_token):
     """
     # Make HTTP request with AWS Version 4 signing
 
+    :return: http request object
     :param method: str
     :param service: str
     :param region: str
@@ -101,31 +101,6 @@ def make_request(method,
 
     def sha256_hash(val):
         return hashlib.sha256(val.encode('utf-8')).hexdigest()
-
-    if access_key is None or secret_key is None or security_token is None:
-        try:
-            config = configparser.ConfigParser()
-            config.read(expanduser("~") + "/.aws/credentials")
-
-            access_key = access_key or config.get(profile, "aws_access_key_id")
-            secret_key = secret_key or config.get(profile,
-                                                  "aws_secret_access_key")
-            if config.has_option(profile, "aws_session_token"):
-                security_token = security_token or config.get(
-                    profile, "aws_session_token")
-
-            if access_key is None or secret_key is None:
-                raise ValueError('No access key is available')
-        except configparser.NoSectionError:
-            __log('AWS profile \'{0}\' not found'.format(profile))
-            return 1
-        except configparser.NoOptionError:
-            __log('AWS profile \'{0}\' is missing access or secret key'
-                  .format(profile))
-            return 1
-        except ValueError as error:
-            __log(error)
-            return 1
 
     # Create a date for headers and the credential string
     t = __now()
@@ -212,10 +187,10 @@ def make_request(method,
     # a header named Authorization. This code shows how to use a header.
     # Create authorization header and add to request headers
     authorization_header = (
-        algorithm + ' ' +
-        'Credential=' + access_key + '/' + credential_scope + ', ' +
-        'SignedHeaders=' + signed_headers + ', ' +
-        'Signature=' + signature
+            algorithm + ' ' +
+            'Credential=' + access_key + '/' + credential_scope + ', ' +
+            'SignedHeaders=' + signed_headers + ', ' +
+            'Signature=' + signature
     )
 
     # The request can include any headers, but MUST include "host",
@@ -259,11 +234,8 @@ def __send_request(uri, data, headers, method):
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % r.status_code)
-    print(r.text)
 
-    r.raise_for_status()
-
-    return 0
+    return r
 
 
 def main():
@@ -321,17 +293,50 @@ def main():
 
     headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
 
-    return make_request(args.request,
-                        args.service,
-                        args.region,
-                        args.uri,
-                        headers,
-                        data,
-                        args.profile,
-                        args.access_key,
-                        args.secret_key,
-                        args.security_token or args.session_token
-                        )
+    # TODO: this needs to be factored out
+    if args.access_key is None or args.secret_key is None or args.security_token is None:
+        try:
+            config = configparser.ConfigParser()
+            config.read(expanduser("~") + "/.aws/credentials")
+
+            args.access_key = args.access_key or config.get(args.profile, "aws_access_key_id")
+            args.secret_key = args.secret_key or config.get(args.profile, "aws_secret_access_key")
+
+            if config.has_option(args.profile, "aws_session_token"):
+                args.security_token = args.security_token or config.get(args.profile, "aws_session_token")
+
+        except configparser.NoSectionError:
+            __log('AWS profile \'{0}\' not found'.format(args.profile))
+            return 1
+        except configparser.NoOptionError:
+            __log('AWS profile \'{0}\' is missing access or secret key'.format(args.profile))
+            return 1
+        except ValueError as error:
+            __log(error)
+            return 1
+
+    if args.access_key is None:
+        raise ValueError('No access key is available')
+
+    if args.secret_key is None:
+        raise ValueError('No secret key is available')
+
+    r = make_request(args.request,
+                     args.service,
+                     args.region,
+                     args.uri,
+                     headers,
+                     data,
+                     args.access_key,
+                     args.secret_key,
+                     args.security_token or args.session_token
+                     )
+
+    print(r.text)
+
+    r.raise_for_status()
+
+    return 0
 
 
 if __name__ == '__main__':

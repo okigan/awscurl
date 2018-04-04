@@ -17,5 +17,5 @@ install:
 # command to run tests
 script:
   - pycodestyle -v awscurl
-  - py.test
+  - py.test -v
 
