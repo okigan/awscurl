@@ -20,7 +20,7 @@ class TestMakeRequestWithToken(TestCase):
         params = {'method': 'GET',
                   'service': 's3',
                   'region': 'us-east-1',
-                  'uri': 'https://awscurl-sample-bucket.s3.amazonaws.com?a=b',
+                  'uri': 'https://awscurl-sample-bucket.s3.amazonaws.com/awscurl-sample-file:.txt?a=b',
                   'headers': headers,
                   'data': '',
                   'profile': '',
