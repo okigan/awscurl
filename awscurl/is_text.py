@@ -1,10 +1,14 @@
-# Imported from http://code.activestate.com/recipes/173220-test-if-a-file-or-string-is-text-or-binary/
+# Based on the source code published on from http://code.activestate.com/recipes/173220-test-if-a-file-or-string-is-text-or-binary/
 # Licensed under the PSF License
 
-import string
+# Try using Python 3 function. If it fails, fallback to Python 2
+try:
+    _null_trans = str.maketrans("", "")
+except AttributeError:
+    import string
+    _null_trans = string.maketrans("", "")
 
 text_characters = "".join(list(map(chr, range(32, 127))) + list("\n\r\t\b"))
-_null_trans = string.maketrans("", "")
 
 
 def is_text(s):
