@@ -3,7 +3,7 @@
 
 import string
 
-text_characters = "".join(map(chr, range(32, 127)) + list("\n\r\t\b"))
+text_characters = "".join(list(map(chr, range(32, 127))) + list("\n\r\t\b"))
 _null_trans = string.maketrans("", "")
 
 
