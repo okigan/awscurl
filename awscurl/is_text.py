@@ -12,11 +12,11 @@ def is_text(s):
     Returns true if 's' does not contain a \0, is empty, or
     if less than 30% are non-text characters.
     """
-    
+
     if "\0" in s:
         return 0
-    
-    if not s:  
+
+    if not s:
         return 1
 
     t = s.translate(_null_trans, text_characters)
