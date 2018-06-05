@@ -13,6 +13,8 @@ import sys
 import configargparse
 import requests
 
+from .is_text import is_text
+
 __author__ = 'iokulist'
 
 is_verbose = False
@@ -100,7 +102,10 @@ def make_request(method,
         return k_signing
 
     def sha256_hash(val):
-        return hashlib.sha256(val.encode('utf-8')).hexdigest()
+        if is_text(val):
+            return hashlib.sha256(val.encode('utf-8')).hexdigest()
+        else:
+            return hashlib.sha256(val).hexdigest()
 
     # Create a date for headers and the credential string
     t = __now()
