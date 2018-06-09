@@ -67,7 +67,8 @@ class TestMakeRequest(TestCase):
                   'data': '',
                   'access_key': '',
                   'secret_key': '',
-                  'security_token': ''}
+                  'security_token': '',
+                  'binary_payload': False}
         make_request(**params)
 
         expected = {'x-amz-date': '19700101T000000Z',
@@ -96,7 +97,8 @@ class TestMakeRequestWithToken(TestCase):
                   'data': '',
                   'access_key': 'ABC',
                   'secret_key': 'DEF',
-                  'security_token': 'GHI'}
+                  'security_token': 'GHI',
+                  'binary_payload': False}
         make_request(**params)
 
         expected = {'x-amz-date': '19700101T000000Z',

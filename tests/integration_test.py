@@ -26,7 +26,8 @@ class TestMakeRequestWithToken(TestCase):
                   'data': '',
                   'access_key': access_key,
                   'secret_key': secret_key,
-                  'security_token': None}
+                  'security_token': None,
+                  'binary_payload': False}
 
         r = make_request(**params)
 
