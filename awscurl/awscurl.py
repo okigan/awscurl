@@ -104,7 +104,7 @@ def make_request(method,
     def sha256_hash(val):
         return hashlib.sha256(val.encode('utf-8')).hexdigest()
 
-    def sha256_binary_hash(val):
+    def sha256_hash_for_binary_data(val):
         return hashlib.sha256(val).hexdigest()
 
     # Create a date for headers and the credential string
@@ -154,7 +154,7 @@ def make_request(method,
 
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
-    payload_hash = sha256_binary_hash(data) if data_binary else sha256_hash(data)
+    payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
 
     # Step 7: Combine elements to create create canonical request
     canonical_request = (method + '\n' +
