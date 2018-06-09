@@ -59,7 +59,7 @@ def make_request(method,
                  access_key,
                  secret_key,
                  security_token,
-                 binary_payload):
+                 data_binary):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -74,6 +74,7 @@ def make_request(method,
     :param access_key: str
     :param secret_key: str
     :param security_token: str
+    :param data_binary: bool
 
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
@@ -101,7 +102,7 @@ def make_request(method,
         return k_signing
 
     def sha256_hash(val):
-        if binary_payload:
+        if data_binary:
             return hashlib.sha256(val).hexdigest()
         else:
             return hashlib.sha256(val.encode('utf-8')).hexdigest()
@@ -295,8 +296,9 @@ def main():
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
-    parser.add_argument('--binary-payload', action='store_true',
-                        help='Process HTTP POST data payload as binary', default=False)
+    parser.add_argument('--data_binary', action='store_true',
+                        help='Process HTTP POST data exactly as specified with '
+                             'no extra processing whatsoever.', default=False)
 
     parser.add_argument('--region', help='AWS region', default='us-east-1', env_var='AWS_DEFAULT_REGION')
     parser.add_argument('--profile', help='AWS profile', default='default', env_var='AWS_PROFILE')
