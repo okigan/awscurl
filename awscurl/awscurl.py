@@ -13,8 +13,6 @@ import sys
 import configargparse
 import requests
 
-from .is_text import is_text
-
 __author__ = 'iokulist'
 
 is_verbose = False
@@ -60,7 +58,8 @@ def make_request(method,
                  data,
                  access_key,
                  secret_key,
-                 security_token):
+                 security_token,
+                 binary_payload):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -102,10 +101,10 @@ def make_request(method,
         return k_signing
 
     def sha256_hash(val):
-        if is_text(val):
-            return hashlib.sha256(val.encode('utf-8')).hexdigest()
-        else:
+        if binary_payload:
             return hashlib.sha256(val).hexdigest()
+        else:
+            return hashlib.sha256(val.encode('utf-8')).hexdigest()
 
     # Create a date for headers and the credential string
     t = __now()
@@ -296,6 +295,9 @@ def main():
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
+    parser.add_argument('--binary-payload', action='store_true',
+                        help='Process HTTP POST data payload as binary', default=False)
+
     parser.add_argument('--region', help='AWS region', default='us-east-1', env_var='AWS_DEFAULT_REGION')
     parser.add_argument('--profile', help='AWS profile', default='default', env_var='AWS_PROFILE')
     parser.add_argument('--service', help='AWS service', default='execute-api')
@@ -346,7 +348,8 @@ def main():
                      data,
                      args.access_key,
                      args.secret_key,
-                     args.security_token or args.session_token
+                     args.security_token or args.session_token,
+                     args.binary_payload
                      )
 
     print(r.text)
