@@ -296,7 +296,7 @@ def main():
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
-    parser.add_argument('--data_binary', action='store_true',
+    parser.add_argument('--data-binary', action='store_true',
                         help='Process HTTP POST data exactly as specified with '
                              'no extra processing whatsoever.', default=False)
 
