@@ -45,7 +45,7 @@ class TestMakeRequestWithTokenAndBinaryData(TestCase):
                   'region': 'us-east-1',
                   'uri': 'https://awscurl-sample-bucket.s3.amazonaws.com/awscurl-sample-file:.txt?a=b',
                   'headers': headers,
-                  'data': 'C\xcfI\x91\xc1\xd0\tw<\xa8\x13\x06{=\x9b\xb3\x1c\xfcl\xfe\xb9\xb18zS\xf4%i*Q\xc9v',
+                  'data': b'C\xcfI\x91\xc1\xd0\tw<\xa8\x13\x06{=\x9b\xb3\x1c\xfcl\xfe\xb9\xb18zS\xf4%i*Q\xc9v',
                   'access_key': access_key,
                   'secret_key': secret_key,
                   'security_token': None,

@@ -69,7 +69,7 @@ def make_request(method,
     :param region: str
     :param uri: str
     :param headers: dict
-    :param data:str
+    :param data: str
     :param profile: str
     :param access_key: str
     :param secret_key: str
