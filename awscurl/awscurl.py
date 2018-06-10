@@ -351,7 +351,7 @@ def main():
                      args.access_key,
                      args.secret_key,
                      args.security_token or args.session_token,
-                     args.binary_payload
+                     args.data_binary
                      )
 
     print(r.text)
