@@ -58,7 +58,8 @@ def make_request(method,
                  data,
                  access_key,
                  secret_key,
-                 security_token):
+                 security_token,
+                 data_binary):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -68,11 +69,12 @@ def make_request(method,
     :param region: str
     :param uri: str
     :param headers: dict
-    :param data:str
+    :param data: str
     :param profile: str
     :param access_key: str
     :param secret_key: str
     :param security_token: str
+    :param data_binary: bool
 
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
@@ -101,6 +103,9 @@ def make_request(method,
 
     def sha256_hash(val):
         return hashlib.sha256(val.encode('utf-8')).hexdigest()
+
+    def sha256_hash_for_binary_data(val):
+        return hashlib.sha256(val).hexdigest()
 
     # Create a date for headers and the credential string
     t = __now()
@@ -149,7 +154,7 @@ def make_request(method,
 
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
-    payload_hash = sha256_hash(data)
+    payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
 
     # Step 7: Combine elements to create create canonical request
     canonical_request = (method + '\n' +
@@ -291,6 +296,10 @@ def main():
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
 
+    parser.add_argument('--data-binary', action='store_true',
+                        help='Process HTTP POST data exactly as specified with '
+                             'no extra processing whatsoever.', default=False)
+
     parser.add_argument('--region', help='AWS region', default='us-east-1', env_var='AWS_DEFAULT_REGION')
     parser.add_argument('--profile', help='AWS profile', default='default', env_var='AWS_PROFILE')
     parser.add_argument('--service', help='AWS service', default='execute-api')
@@ -341,7 +350,8 @@ def main():
                      data,
                      args.access_key,
                      args.secret_key,
-                     args.security_token or args.session_token
+                     args.security_token or args.session_token,
+                     args.data_binary
                      )
 
     print(r.text)
