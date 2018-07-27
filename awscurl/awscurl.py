@@ -59,7 +59,8 @@ def make_request(method,
                  access_key,
                  secret_key,
                  security_token,
-                 data_binary):
+                 data_binary,
+                 verify=True):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -75,6 +76,7 @@ def make_request(method,
     :param secret_key: str
     :param security_token: str
     :param data_binary: bool
+    :param verify: bool
 
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
@@ -211,7 +213,7 @@ def make_request(method,
         'x-amz-content-sha256': payload_hash
     })
 
-    return __send_request(uri, data, headers, method)
+    return __send_request(uri, data, headers, method, verify)
 
 
 def __normalize_query_string(query):
@@ -228,14 +230,14 @@ def __now():
     return datetime.datetime.utcnow()
 
 
-def __send_request(uri, data, headers, method):
+def __send_request(uri, data, headers, method, verify):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
     __log(headers)
 
     __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
     __log('Request URL = ' + uri)
 
-    r = requests.request(method, uri, headers=headers, data=data)
+    r = requests.request(method, uri, headers=headers, data=data, verify=verify)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % r.status_code)
@@ -295,6 +297,9 @@ def main():
                         default='GET')
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
+    parser.add_argument('-k', '--insecure', action='store_false',
+                        help='This option allows awscurl to proceed and operate even for server '
+                             'connections otherwise considered insecure')
 
     parser.add_argument('--data-binary', action='store_true',
                         help='Process HTTP POST data exactly as specified with '
@@ -351,7 +356,8 @@ def main():
                      args.access_key,
                      args.secret_key,
                      args.security_token or args.session_token,
-                     args.data_binary
+                     args.data_binary,
+                     args.insecure
                      )
 
     print(r.text)
