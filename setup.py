@@ -21,6 +21,6 @@ setup(
         'requests',
         'configargparse',
         'configparser',
-        'urllib3[secure]<1.24,>=1.21.1
+        'urllib3[secure]<1.24,>=1.21.1'
     ]
 )
