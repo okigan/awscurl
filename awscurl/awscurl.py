@@ -292,6 +292,8 @@ def main():
 
     parser.add_argument('-v', '--verbose', action='store_true',
                         help='verbose flag', default=False)
+    parser.add_argument('-i', '--include', action='store_true',
+                        help='include headers in the output', default=False)
     parser.add_argument('-X', '--request',
                         help='Specify request command to use',
                         default='GET')
@@ -360,6 +362,8 @@ def main():
                      args.insecure
                      )
 
+    if args.include:
+        print(r.headers, end='\n\n')
     print(r.text)
 
     r.raise_for_status()
