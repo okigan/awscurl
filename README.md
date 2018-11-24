@@ -72,6 +72,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose         verbose flag (default: False)
+  -i, --include         include headers in response (default: False)
   -X REQUEST, --request REQUEST
                         Specify request command to use (default: GET)
   -d DATA, --data DATA  HTTP POST data (default: )
