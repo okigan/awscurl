@@ -56,7 +56,7 @@ docker run --rm -it -v "$AWS_DIR:/root/.aws" "$USER/awscurl:latest" "$@"
 
 ## Options
 ```
-usage: awscurl [-h] [-v] [-X REQUEST] [-d DATA] [-H HEADER]
+usage: awscurl [-h] [-v] [-i] [-X REQUEST] [-d DATA] [-H HEADER]
                   [--region REGION] [--service SERVICE]
                   [--profile AWS_PROFILE]
                   [--access_key ACCESS_KEY] [--secret_key SECRET_KEY]
