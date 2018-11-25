@@ -56,7 +56,7 @@ docker run --rm -it -v "$AWS_DIR:/root/.aws" "$USER/awscurl:latest" "$@"
 
 ## Options
 ```
-usage: awscurl [-h] [-v] [-X REQUEST] [-d DATA] [-H HEADER]
+usage: awscurl [-h] [-v] [-i] [-X REQUEST] [-d DATA] [-H HEADER]
                   [--region REGION] [--service SERVICE]
                   [--profile AWS_PROFILE]
                   [--access_key ACCESS_KEY] [--secret_key SECRET_KEY]
@@ -72,6 +72,7 @@ positional arguments:
 optional arguments:
   -h, --help            show this help message and exit
   -v, --verbose         verbose flag (default: False)
+  -i, --include         include headers in response (default: False)
   -X REQUEST, --request REQUEST
                         Specify request command to use (default: GET)
   -d DATA, --data DATA  HTTP POST data (default: )
