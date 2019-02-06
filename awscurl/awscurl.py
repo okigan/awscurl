@@ -12,7 +12,6 @@ import sys
 
 import configargparse
 import requests
-import botocore
 __author__ = 'iokulist'
 
 is_verbose = False
@@ -348,11 +347,12 @@ def main():
             import botocore.session
             session = botocore.session.get_session()
             cred = session.get_credentials()
-            if not cred.refresh_needed():
-                args.access_key, args.secret_key, args.security_token = cred.access_key,cred.secret_key,cred.token
-            else:
-                cred = session.get_credentials()
-                args.access_key, args.secret_key, args.security_token = cred.access_key,cred.secret_key,cred.token
+            if cred:
+                if not cred.refresh_needed():
+                    args.access_key, args.secret_key, args.security_token = cred.access_key,cred.secret_key,cred.token
+                else:
+                    cred = session.get_credentials()
+                    args.access_key, args.secret_key, args.security_token = cred.access_key,cred.secret_key,cred.token
 
         except ImportError:
            __log("couldn't find botocore package")
