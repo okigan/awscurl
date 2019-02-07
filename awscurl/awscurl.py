@@ -279,7 +279,6 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
     return access_key, secret_key, security_token
 
 
-
 def main():
     # note EC2 ignores Accept header and responds in xml
     default_headers = ['Accept: application/xml',
@@ -349,15 +348,14 @@ def main():
             cred = session.get_credentials()
             if cred:
                 if not cred.refresh_needed():
-                    args.access_key, args.secret_key, args.security_token = cred.access_key,cred.secret_key,cred.token
+                    args.access_key, args.secret_key, args.security_token = cred.access_key, cred.secret_key, cred.token
                 else:
                     cred = session.get_credentials()
-                    args.access_key, args.secret_key, args.security_token = cred.access_key,cred.secret_key,cred.token
+                    args.access_key, args.secret_key, args.security_token = cred.access_key, cred.secret_key, cred.token
 
         except ImportError:
-           __log("couldn't find botocore package")
+            __log("couldn't find botocore package")
 
-        
     if args.access_key is None:
         raise ValueError('No access key is available')
 
