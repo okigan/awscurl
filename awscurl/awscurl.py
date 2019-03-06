@@ -132,8 +132,8 @@ def make_request(method,
     canonical_querystring = __normalize_query_string(query)
     __log(canonical_querystring)
 
-    ## If the host was specified in the HTTP header, ensure that the canonical
-    ## headers are set accordingly
+    # If the host was specified in the HTTP header, ensure that the canonical
+    # headers are set accordingly
     if 'host' in headers:
         fullhost = headers['host']
     else:
