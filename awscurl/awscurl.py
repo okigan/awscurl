@@ -132,13 +132,13 @@ def make_request(method,
     canonical_querystring = __normalize_query_string(query)
     __log(canonical_querystring)
 
+    ## If the host was specified in the HTTP header, ensure that the canonical
+    ## headers are set accordingly
     if 'host' in headers:
         fullhost = headers['host']
     else:
-        fullhost = host
+        fullhost = host + ':' + port if port else host
 
-    if port:
-        fullhost = host + ':' + port
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
