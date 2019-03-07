@@ -241,3 +241,33 @@ class TestMakeRequestWithTokenAndBinaryData(TestCase):
         self.assertEqual(expected, headers)
 
         pass
+
+class TestHostFromHeaderUsedInCanonicalHeader(TestCase):
+    maxDiff = None
+
+    @patch('requests.get', new_callable=my_mock_get)
+    @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
+    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
+    def test_make_request(self, *args, **kvargs):
+        headers = {'host': 'some.other.host.address.com'}
+        params = {'method': 'GET',
+                  'service': 'ec2',
+                  'region': 'region',
+                  'uri': 'https://user:pass@host:123/path/?a=b&c=d',
+                  'headers': headers,
+                  'data': '',
+                  'access_key': 'ABC',
+                  'secret_key': 'DEF',
+                  'security_token': 'GHI',
+                  'data_binary': False}
+        make_request(**params)
+
+        expected = {'host': 'some.other.host.address.com',
+                    'x-amz-date': '19700101T000000Z',
+                    'x-amz-content-sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=9cba1c499417655c170f5018b577b9f89154cf9b9827273df54bfa182e5f4273',
+                    'x-amz-security-token': 'GHI'}
+
+        self.assertEqual(expected, headers)
+
+        pass
