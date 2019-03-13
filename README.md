@@ -96,3 +96,6 @@ the credentials you set in `~/.aws/credentials`. If you
 do not specify a `--profile` or `AWS_PROFILE`, `awscurl`
 uses `default`.
 
+
+## Related projects
+  * awscurl in Go: https://github.com/allthings/awscurl
