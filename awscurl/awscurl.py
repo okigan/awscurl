@@ -316,6 +316,8 @@ def main():
     parser.add_argument('--service', help='AWS service', default='execute-api')
     parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
     parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
+    # AWS_SECURITY_TOKEN is deprecated, but kept for backward compatibility
+    # https://github.com/boto/botocore/blob/c76553d3158b083d818f88c898d8f6d7918478fd/botocore/credentials.py#L260-262
     parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
     parser.add_argument('--session_token', env_var='AWS_SESSION_TOKEN')
 
@@ -338,14 +340,18 @@ def main():
     if args.header is None:
         args.header = default_headers
 
+    if args.security_token is not None:
+        args.session_token = args.security_token
+        del args.security_token
+
     headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
-    args.access_key, args.secret_key, args.security_token = load_aws_config(args.access_key,
-                                                                            args.secret_key,
-                                                                            args.security_token,
-                                                                            credentials_path,
-                                                                            args.profile)
+    args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,
+                                                                           args.secret_key,
+                                                                           args.session_token,
+                                                                           credentials_path,
+                                                                           args.profile)
 
     if args.access_key is None:
         raise ValueError('No access key is available')
@@ -361,7 +367,7 @@ def main():
                      data,
                      args.access_key,
                      args.secret_key,
-                     args.security_token or args.session_token,
+                     args.session_token,
                      args.data_binary,
                      args.insecure
                      )
