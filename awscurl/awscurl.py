@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
-import configparser
 import datetime
 import hashlib
 import hmac
@@ -11,6 +10,7 @@ import re
 import sys
 
 import configargparse
+import configparser
 import requests
 
 __author__ = 'iokulist'
@@ -250,8 +250,16 @@ def __send_request(uri, data, headers, method, verify):
 
 
 def load_aws_config(access_key, secret_key, security_token, credentials_path, profile):
-    if access_key is None or secret_key is None or security_token is None:
+    # type: (str, str, str, str, str) -> Tuple[str, str, str]
+    """
+    Load aws credential configuration, by parsing credential file, then try to fall back to botocore,
+    by checking (access_key,secret_key) are not (None,None)
+    """
+    if access_key is None or secret_key is None:
         try:
+            exists = os.path.exists(credentials_path)
+            __log('Credentials file \'{0}\' exists \'{1}\''.format(credentials_path, exists))
+
             config = configparser.ConfigParser()
             config.read(credentials_path)
 
@@ -280,6 +288,21 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
         except ValueError as e:
             __log(e)
             raise e
+
+    # try to load instance credentials using botocore
+    if access_key is None or secret_key is None:
+        try:
+            __log("loading botocore package")
+            import botocore
+        except ImportError:
+            __log("botocore package could not be loaded")
+            botocore = None
+
+        if botocore:
+            import botocore.session
+            session = botocore.session.get_session()
+            cred = session.get_credentials()
+            access_key, secret_key, security_token = cred.access_key, cred.secret_key, cred.token
 
     return access_key, secret_key, security_token
 
