@@ -25,12 +25,12 @@ def __log(*args, **kwargs):
     pp.pprint(*args, **kwargs)
 
 
-def __url_path_to_dict(path):
+def url_path_to_dict(path):
     """http://stackoverflow.com/a/17892757/142207"""
 
     pattern = (r'^'
                r'((?P<schema>.+?)://)?'
-               r'((?P<user>.+?)(:(?P<password>.*?))?@)?'
+               r'((?P<user>[^/]+?)(:(?P<password>[^/]*?))?@)?'
                r'(?P<host>.*?)'
                r'(:(?P<port>\d+?))?'
                r'(?P<path>/.*?)?'
@@ -81,7 +81,7 @@ def make_request(method,
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
 
-    uri_dict = __url_path_to_dict(uri)
+    uri_dict = url_path_to_dict(uri)
     host = uri_dict['host']
     query = uri_dict['query']
     canonical_uri = uri_dict['path']
