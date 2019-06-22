@@ -1,3 +1,4 @@
 requests
 configargparse
 configparser
+botocore
