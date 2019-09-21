@@ -9,7 +9,7 @@ from awscurl.awscurl import (
     task_1_create_a_canonical_request,
     task_2_create_the_string_to_sign,
     task_3_calculate_the_signature,
-    task_4_get_signed_headers_for_the_request)
+    task_4_build_auth_headers_for_the_request)
 
 class TestStages(TestCase):
     """
@@ -88,24 +88,20 @@ class TestStages(TestCase):
         self.assertEqual(signature,
                          "9164aea23e266890838ff6e51eea552e2ee39c63896ac61d91990f200bb16362")
 
-    def test_task_4_get_signed_headers_for_the_request(self):
+    def test_task_4_build_auth_headers_for_the_request(self):
         """
         Test that we are adding the proper headers based on all our calculated information.
         """
-        new_headers = task_4_get_signed_headers_for_the_request(
+        new_headers = task_4_build_auth_headers_for_the_request(
             amzdate="20190921T022008Z",
             payload_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
             algorithm="AWS4-HMAC-SHA256",
             credential_scope="20190921/us-east-1/ec2/aws4_request",
             signed_headers="host;x-amz-date",
             signature="9164aea23e266890838ff6e51eea552e2ee39c63896ac61d91990f200bb16362",
-            headers={'Content-Type': 'application/json', 'Accept': 'application/xml',
-                     'Authorization': 'should override'},
             access_key="AKIAIJLPLDILMJV53HCQ",
             security_token=None,
             )
-        self.assertEqual(new_headers['Content-Type'], 'application/json')
-        self.assertEqual(new_headers['Accept'], 'application/xml')
         self.assertEqual(
             new_headers['x-amz-content-sha256'],
             'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
