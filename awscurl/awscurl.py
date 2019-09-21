@@ -11,6 +11,7 @@ import os
 import pprint
 import sys
 import re
+import copy
 
 import configparser
 import configargparse
@@ -120,7 +121,7 @@ def make_request(method,
         service,
         region,
         secret_key)
-    aws_auth_headers = task_4_add_signing_information_to_the_request(
+    new_headers = task_4_get_signed_headers_for_the_request(
         amzdate,
         payload_hash,
         algorithm,
@@ -130,7 +131,7 @@ def make_request(method,
         headers,
         access_key,
         security_token)
-    headers.update(aws_auth_headers)
+    headers.update(new_headers)
 
     return __send_request(uri, data, headers, method, verify)
 
@@ -267,7 +268,7 @@ def task_3_calculate_the_signature(
     return signature
 
 
-def task_4_add_signing_information_to_the_request(
+def task_4_get_signed_headers_for_the_request(
         amzdate,
         payload_hash,
         algorithm,
@@ -279,10 +280,15 @@ def task_4_add_signing_information_to_the_request(
         security_token):
     """
     ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST ***********
-    The signing information can be either in a query string value or in
-    a header named Authorization. This code shows how to use a header.
-    Create authorization header and add to request headers
+    The signing information can be either in a query string value or in a header
+    named Authorization. This function shows how to use the header. It takes the
+    existing headers dict as input and returns a new headers dict with the
+    signing information added.
     """
+    # Create a copy of the headers argument so we don't modify it
+    new_headers = copy.deepcopy(headers)
+
+    # Create authorization header and add to request headers
     authorization_header = (
         algorithm + ' ' +
         'Credential=' + access_key + '/' + credential_scope + ', ' +
@@ -296,13 +302,13 @@ def task_4_add_signing_information_to_the_request(
     # signed_headers, as noted earlier. Order here is not significant.
     # Python note: The 'host' header is added automatically by the Python
     # 'requests' library.
-    headers = {
+    new_headers.update({
         'Authorization': authorization_header,
         'x-amz-date': amzdate,
         'x-amz-security-token': security_token,
         'x-amz-content-sha256': payload_hash
-    }
-    return headers
+    })
+    return new_headers
 
 
 def __normalize_query_string(query):
