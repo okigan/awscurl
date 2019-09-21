@@ -1,7 +1,7 @@
+#!/usr/bin/env python
 """
 Awscurl implementation
 """
-#!/usr/bin/env python
 from __future__ import print_function
 
 import datetime
@@ -29,6 +29,7 @@ def __log(*args, **kwargs):
     stderr_pp = pprint.PrettyPrinter(stream=sys.stderr)
     stderr_pp.pprint(*args, **kwargs)
 
+
 def url_path_to_dict(path):
     """http://stackoverflow.com/a/17892757/142207"""
 
@@ -39,8 +40,7 @@ def url_path_to_dict(path):
                r'(:(?P<port>\d+?))?'
                r'(?P<path>/.*?)?'
                r'(\?(?P<query>.*?))?'
-               r'$'
-              )
+               r'$')
     regex = re.compile(pattern)
     url_match = regex.match(path)
     url_dict = url_match.groupdict() if url_match is not None else None
@@ -52,6 +52,7 @@ def url_path_to_dict(path):
         url_dict['query'] = ''
 
     return url_dict
+
 
 # pylint: disable=too-many-arguments,too-many-locals
 def make_request(method,
@@ -133,6 +134,7 @@ def make_request(method,
 
     return __send_request(uri, data, headers, method, verify)
 
+
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
@@ -206,6 +208,7 @@ def task_1_create_a_canonical_request(
     __log('\nCANONICAL REQUEST = ' + canonical_request)
     return canonical_request, payload_hash, signed_headers
 
+
 def task_2_create_the_string_to_sign(
         amzdate,
         datestamp,
@@ -229,6 +232,7 @@ def task_2_create_the_string_to_sign(
 
     __log('\nSTRING_TO_SIGN = ' + string_to_sign)
     return string_to_sign, algorithm, credential_scope
+
 
 def task_3_calculate_the_signature(
         datestamp,
@@ -261,6 +265,7 @@ def task_3_calculate_the_signature(
     encoded = string_to_sign.encode('utf-8')
     signature = hmac.new(signing_key, encoded, hashlib.sha256).hexdigest()
     return signature
+
 
 def task_4_add_signing_information_to_the_request(
         amzdate,
@@ -300,7 +305,6 @@ def task_4_add_signing_information_to_the_request(
     return headers
 
 
-
 def __normalize_query_string(query):
     parameter_pairs = (list(map(str.strip, s.split("=")))
                        for s in query.split('&')
@@ -328,6 +332,7 @@ def __send_request(uri, data, headers, method, verify):
     __log('Response code: %d\n' % response.status_code)
 
     return response
+
 
 # pylint: disable=too-many-branches
 def load_aws_config(access_key, secret_key, security_token, credentials_path, profile):
@@ -479,8 +484,7 @@ def main():
                             args.secret_key,
                             args.session_token,
                             args.data_binary,
-                            args.insecure
-                           )
+                            args.insecure)
 
     if args.include:
         print(response.headers, end='\n\n')
