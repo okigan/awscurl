@@ -15,6 +15,8 @@ import re
 import configparser
 import configargparse
 import requests
+from requests.structures import CaseInsensitiveDict
+
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
 
@@ -458,6 +460,7 @@ def main():
 
     # pylint: disable=deprecated-lambda
     headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
+    headers = CaseInsensitiveDict(headers)
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
     args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,
