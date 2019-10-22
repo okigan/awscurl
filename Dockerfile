@@ -11,5 +11,4 @@ RUN set -ex \
   && pip install -r requirements.txt \
   && apk del .build-deps
 
-ENTRYPOINT ["python", "/awscurl/awscurl.py"]
-
+ENTRYPOINT ["python", "-m", "awscurl.awscurl"]
