@@ -484,7 +484,7 @@ def main():
                             args.data_binary,
                             args.insecure)
 
-    if args.include:
+    if args.include or IS_VERBOSE:
         print(response.headers, end='\n\n')
     print(response.text)
 
