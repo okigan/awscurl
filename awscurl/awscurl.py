@@ -131,7 +131,10 @@ def make_request(method,
         security_token)
     headers.update(auth_headers)
 
-    return __send_request(uri, data, headers, method, verify)
+    if data_binary:
+        return __send_request(uri, data, headers, method, verify)
+    else:
+        return __send_request(uri, data.encode('utf-8'), headers, method, verify)
 
 
 # pylint: disable=too-many-arguments,too-many-locals
