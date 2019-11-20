@@ -89,7 +89,7 @@ class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
                   'region': 'us-east-1',
                   'uri': 'https://awscurl-sample-bucket.s3.amazonaws.com/awscurl-sample-file:.txt?a=b',
                   'headers': headers,
-                  'data': 'テスト',
+                  'data': u'テスト',
                   'access_key': access_key,
                   'secret_key': secret_key,
                   'security_token': None,
