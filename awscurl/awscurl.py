@@ -488,8 +488,8 @@ def main():
                             args.insecure)
 
     if args.include or IS_VERBOSE:
-        print(response.headers, end='\n\n')
-    print(response.text)
+        print(response.headers.encode('utf-8'), end='\n\n')
+    print(response.text.encode('utf-8'))
 
     response.raise_for_status()
 
