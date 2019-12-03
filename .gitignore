@@ -2,3 +2,6 @@
 /build/
 /dist/
 /*.egg-info
+/venv/
+/.pytest_cache/v/cache/
+/.coverage
