@@ -1,2 +1,8 @@
 #!/bin/bash
-python setup.py sdist upload
+set -e
+
+pip install twine
+
+python setup.py sdist bdist_wheel
+
+twine upload dist/*
