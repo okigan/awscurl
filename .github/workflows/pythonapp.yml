@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        runs-on: [ubuntu-latest, macOS-latest, windows-latest]
+        runs-on: [ubuntu-latest, macOS-latest]
         python-version: [ '2.7', '3.6', '3.8']
 
     runs-on: ${{ matrix.runs-on }}
