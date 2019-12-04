@@ -37,4 +37,4 @@ jobs:
       - name: Test with pytest
         run: |
           pip install pytest
-          pytest -v --cov=awscurl --cov-fail-under=82 --cov-report html --cov-report annotate
+          pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
