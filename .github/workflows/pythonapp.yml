@@ -38,3 +38,8 @@ jobs:
         run: |
           pip install pytest
           pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
+      - name: Install dependencies
+        run: |
+          pip install tox tox-gh-actions
+      - name: Test with tox
+        run: tox
