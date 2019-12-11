@@ -20,5 +20,5 @@ env:
 # command to run tests
 script:
   - pycodestyle -v awscurl
-  - py.test -v
+  - pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
 
