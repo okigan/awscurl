@@ -5,9 +5,11 @@ import base64
 
 from unittest import TestCase
 
+import pytest
 from mock import patch
+from requests import HTTPError
 
-from awscurl.awscurl import make_request
+from awscurl.awscurl import make_request, main
 
 __author__ = 'iokulist'
 
@@ -34,6 +36,7 @@ class TestMakeRequestWithToken(TestCase):
 
         self.assertEqual(r.status_code, 200)
 
+
 class TestMakeRequestWithTokenAndBinaryData(TestCase):
     maxDiff = None
 
@@ -55,6 +58,7 @@ class TestMakeRequestWithTokenAndBinaryData(TestCase):
         r = make_request(**params)
 
         self.assertEqual(r.status_code, 200)
+
 
 class TestMakeRequestWithTokenAndEnglishData(TestCase):
     maxDiff = None
@@ -78,6 +82,7 @@ class TestMakeRequestWithTokenAndEnglishData(TestCase):
 
         self.assertEqual(r.status_code, 200)
 
+
 class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
     maxDiff = None
 
@@ -99,3 +104,10 @@ class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
         r = make_request(**params)
 
         self.assertEqual(r.status_code, 200)
+
+
+class TestMainMethod(TestCase):
+    maxDiff = None
+
+    with pytest.raises(HTTPError):
+        main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com'])

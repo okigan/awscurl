@@ -11,6 +11,11 @@ jobs:
 
     runs-on: ${{ matrix.runs-on }}
 
+    env:
+      AWS_ACCESS_KEY_ID: MOCK_AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY: MOCK_AWS_SECRET_ACCESS_KEY
+      AWS_SESSION_TOKEN: MOCK_AWS_SESSION_TOKEN
+
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python ${{ matrix.python-version }}
@@ -22,6 +27,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-test.txt
+          pip install pytest
+          pip install tox tox-gh-actions
       #     - name: Lint with flake8
       #       run: |
       #         pip install flake8
@@ -31,5 +38,6 @@ jobs:
       #         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         run: |
-          pip install pytest
-          pytest
+          pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
+      - name: Test with tox
+        run: tox
