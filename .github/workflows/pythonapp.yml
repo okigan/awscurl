@@ -27,6 +27,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install -r requirements-test.txt
+          pip install pytest
+          pip install tox tox-gh-actions
       #     - name: Lint with flake8
       #       run: |
       #         pip install flake8
@@ -36,10 +38,6 @@ jobs:
       #         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Test with pytest
         run: |
-          pip install pytest
           pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
-      - name: Install dependencies
-        run: |
-          pip install tox tox-gh-actions
       - name: Test with tox
         run: tox
