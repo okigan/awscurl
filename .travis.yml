@@ -13,8 +13,12 @@ python:
 install:
   - pip install -r requirements.txt
   - pip install -r requirements-test.txt
+
+env:
+  - AWS_ACCESS_KEY_ID=MOCK_AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=MOCK_AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN=MOCK_AWS_SESSION_TOKEN
+
 # command to run tests
 script:
   - pycodestyle -v awscurl
-  - py.test -v
+  - pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
 

@@ -394,7 +394,7 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
     return access_key, secret_key, security_token
 
 
-def main():
+def main(argv):
     """
     Awscurl CLI main entry point
     """
@@ -437,13 +437,13 @@ def main():
 
     parser.add_argument('uri')
 
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     # pylint: disable=global-statement
     global IS_VERBOSE
     IS_VERBOSE = args.verbose
 
     if args.verbose:
-        __log(vars(parser.parse_args()))
+        __log(vars(args))
 
     data = args.data
 
@@ -497,4 +497,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
