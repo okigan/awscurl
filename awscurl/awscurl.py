@@ -394,7 +394,7 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
     return access_key, secret_key, security_token
 
 
-def main(argv):
+def inner_main(argv):
     """
     Awscurl CLI main entry point
     """
@@ -496,5 +496,9 @@ def main(argv):
     return 0
 
 
+def main():
+    inner_main(sys.argv[1:])
+
+
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
