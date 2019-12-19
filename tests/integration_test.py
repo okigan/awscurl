@@ -9,7 +9,7 @@ import pytest
 from mock import patch
 from requests import HTTPError
 
-from awscurl.awscurl import make_request, main
+from awscurl.awscurl import make_request, inner_main
 
 __author__ = 'iokulist'
 
@@ -106,8 +106,8 @@ class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
         self.assertEqual(r.status_code, 200)
 
 
-class TestMainMethod(TestCase):
+class TestInnerMainMethod(TestCase):
     maxDiff = None
 
     with pytest.raises(HTTPError):
-        main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com'])
+        inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com'])

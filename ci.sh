@@ -9,4 +9,4 @@ pip install -r requirements-test.txt
 
 pycodestyle -v awscurl
 
-pytest -v --cov=awscurl --cov-fail-under=80 --cov-report html --cov-report annotate
+pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html --cov-report annotate
