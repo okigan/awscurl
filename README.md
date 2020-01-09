@@ -4,6 +4,10 @@
 
 Curl like tool with AWS Signature Version 4 request signing.
 
+## Features
+  * performes requests to AWS services with requests signing using curl interface
+  * supports IAM profile credentials
+
 
 ## Overview
 Requests to AWS API must be signed (see [Signing AWS API Requests](http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html))
