@@ -101,3 +101,4 @@ uses `default`.
 
 ## Related projects
   * awscurl in Go: https://github.com/allthings/awscurl
+  * awscurl in List: https://github.com/aw/picolisp-awscurl
