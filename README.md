@@ -24,6 +24,11 @@ automates the process of signing and allows to make requests to AWS as simple as
   $ pip install git+https://github.com/okigan/awscurl
   ```
 
+#### Installation via Homebrew for MacOS
+  ```sh
+  $ brew install awscurl
+  ```
+
 #### Installation via Docker
 Assumes Docker is installed and the working directory is project root of the cloned repo.  Result will be an image named `$USER/awscurl`.  
 
