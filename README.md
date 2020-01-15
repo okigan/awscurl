@@ -108,6 +108,10 @@ do not specify a `--profile` or `AWS_PROFILE`, `awscurl`
 uses `default`.
 
 
+## Who uses awscurl
+  * [AWS Documentation](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-how-to-call-websocket-api-connections.html)
+  * [Onica blog](https://onica.com/blog/how-to/how-to-kibana-default-index-pattern/)
+
 ## Related projects
   * awscurl in Go: https://github.com/allthings/awscurl
   * awscurl in List: https://github.com/aw/picolisp-awscurl
