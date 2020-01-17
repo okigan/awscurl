@@ -2,6 +2,7 @@
 [![PyPI](https://img.shields.io/pypi/v/awscurl.svg)](https://pypi.python.org/pypi/awscurl)
 [![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
 
+
 Curl like tool with AWS Signature Version 4 request signing.
 
 ## Features
@@ -115,3 +116,6 @@ uses `default`.
 ## Related projects
   * awscurl in Go: https://github.com/allthings/awscurl
   * awscurl in List: https://github.com/aw/picolisp-awscurl
+
+## Last but not least
+  * [Sponsor awscurl](https://github.com/sponsors/okigan)
