@@ -460,7 +460,7 @@ def inner_main(argv):
         del args.security_token
 
     # pylint: disable=deprecated-lambda
-    headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
+    headers = {k.lower(): v for (k, v) in map(lambda s: s.split(": "), args.header)}
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
     args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,
