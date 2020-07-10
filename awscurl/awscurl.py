@@ -449,7 +449,8 @@ def inner_main(argv):
 
     if data is not None and data.startswith("@"):
         filename = data[1:]
-        with open(filename, "r") as post_data_file:
+        read_mode = "rb" if args.data_binary else "r"
+        with open(filename, read_mode) as post_data_file:
             data = post_data_file.read()
 
     if args.header is None:
