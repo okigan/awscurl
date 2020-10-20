@@ -10,6 +10,7 @@ from mock import patch
 from awscurl.awscurl import make_request
 
 from requests.exceptions import SSLError
+from requests import Response
 
 import pytest
 __author__ = 'iokulist'
@@ -271,3 +272,37 @@ class TestHostFromHeaderUsedInCanonicalHeader(TestCase):
         self.assertEqual(expected, headers)
 
         pass
+
+class TestRequestResponse(TestCase):
+  maxDiff = None
+
+  @patch('awscurl.awscurl.__send_request')
+  def test_make_request(self, mocked_resp):
+    resp = Response()
+    resp.status_code=200
+    resp._content= b'{"file_name": "test.yml", "env": "staging", "hash": "\xe5\xad\x97"}'
+    resp.encoding= 'UTF-8'
+    mocked_resp.return_value = resp
+
+    headers = {}
+    params = {'method': 'GET',
+              'service': 'ec2',
+              'region': 'region',
+              'uri': 'https://user:pass@host:123/path/?a=b&c=d',
+              'headers': headers,
+              'data': b'C\xcfI\x91\xc1\xd0\tw<\xa8\x13\x06{=\x9b\xb3\x1c\xfcl\xfe\xb9\xb18zS\xf4%i*Q\xc9v',
+              'access_key': '',
+              'secret_key': '',
+              'security_token': '',
+              'data_binary': True}
+    r = make_request(**params)
+
+    expected = u'字'
+
+    ### assert that the unicode character is in the response.text output
+    self.assertTrue(expected in r.text)
+
+    ### assert that the unicode character is _not_ in the response.text which has been converted to bytes
+    self.assertFalse(expected in str(r.text.encode('utf-8')))
+
+    pass

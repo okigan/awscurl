@@ -489,7 +489,7 @@ def inner_main(argv):
 
     if args.include or IS_VERBOSE:
         print(response.headers, end='\n\n')
-    print(response.text.encode('utf-8'))
+    print(response.text)
 
     response.raise_for_status()
 
