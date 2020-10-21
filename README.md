@@ -116,6 +116,8 @@ uses `default`.
 ## Who uses awscurl
   * [AWS Documentation](https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-how-to-call-websocket-api-connections.html)
   * [Onica blog](https://onica.com/blog/how-to/how-to-kibana-default-index-pattern/)
+  * On [StackOverflow](https://stackoverflow.com/search?q=awscurl)
+  * On [DevOps StackExchange](https://devops.stackexchange.com/search?q=awscurl)
 
 ## Related projects
   * awscurl in Go:
