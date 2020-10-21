@@ -4,6 +4,9 @@ Awscurl implementation
 """
 from __future__ import print_function
 
+
+check the build script picks up the right branch
+
 import datetime
 import hashlib
 import hmac
