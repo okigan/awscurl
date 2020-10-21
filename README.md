@@ -115,8 +115,10 @@ uses `default`.
   * [Onica blog](https://onica.com/blog/how-to/how-to-kibana-default-index-pattern/)
 
 ## Related projects
-  * awscurl in Go: https://github.com/allthings/awscurl
-  * awscurl in List: https://github.com/aw/picolisp-awscurl
+  * awscurl in Go:
+    * https://github.com/allthings/awscurl
+    * https://github.com/legal90/awscurl
+  * awscurl in Lisp: https://github.com/aw/picolisp-awscurl
 
 ## Last but not least
   * [Sponsor awscurl](https://github.com/sponsors/okigan)
