@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import sys
 
 from unittest import TestCase
 
@@ -280,8 +281,8 @@ class TestRequestResponse(TestCase):
   def test_make_request(self, mocked_resp):
     resp = Response()
     resp.status_code=200
-    resp._content= b'{"file_name": "test.yml", "env": "staging", "hash": "\xe5\xad\x97"}'
-    resp.encoding= 'UTF-8'
+    resp._content = b'{"file_name": "test.yml", "env": "staging", "hash": "\xe5\xad\x97"}'
+    resp.encoding = 'UTF-8'
     mocked_resp.return_value = resp
 
     headers = {}
@@ -297,12 +298,20 @@ class TestRequestResponse(TestCase):
               'data_binary': True}
     r = make_request(**params)
 
-    expected = u'字'
+    expected = u'\u5b57'
 
     ### assert that the unicode character is in the response.text output
     self.assertTrue(expected in r.text)
 
-    ### assert that the unicode character is _not_ in the response.text which has been converted to bytes
-    self.assertFalse(expected in str(r.text.encode('utf-8')))
+    ### assert that the unicode character is _not_ in the response.text.encode('utf-8')
+    ### which has been converted to 8-bit string with unicode characters escaped
+    ### in py2 this raises an exception on the assertion (`expected in x` below)
+    ### in py3 we can compare the two directly, and the assertion should be false
+    if sys.version_info[0] == 2:
+        with self.assertRaises(UnicodeDecodeError):
+            x = str(r.text.encode('utf-8'))
+            expected in x
+    else:
+        self.assertFalse(expected in str(r.text.encode('utf-8')))
 
     pass
