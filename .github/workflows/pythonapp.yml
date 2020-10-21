@@ -5,7 +5,11 @@ on:
     branches: [ $default-branch ]
   pull_request:
     branches: [ $default-branch ]
-
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: Git Ref (Optional)    
+        required: false
 jobs:
   build:
     strategy:
