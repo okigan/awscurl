@@ -116,6 +116,7 @@ uses `default`.
     * https://github.com/allthings/awscurl
     * https://github.com/legal90/awscurl
   * awscurl in Lisp: https://github.com/aw/picolisp-awscurl
+  * awscurl on DockerHub: https://hub.docker.com/r/okigan/awscurl
 
 ## Last but not least
   * [Sponsor awscurl](https://github.com/sponsors/okigan)
