@@ -46,6 +46,15 @@ automates the process of signing and allows to make requests to AWS as simple as
   # or allow access to local credentials as following
   $ docker run --rm -it -v "$HOME/.aws:/root/.aws" okigan/awscurl --service s3 s3://...
   ```
+  In order to shorten the length of docker commands, you can add the following alias:
+
+  ```
+  $ alias awscurl='docker run --rm -ti -v "$HOME/.aws:/root/.aws" okigan/awscurl'
+  ```
+  This will allow you to run the awscurl from within a Docker container as if it was installed on the host system:
+  ```
+  $ awscurl
+  ```
 
 ## Examples
 * Call S3:
