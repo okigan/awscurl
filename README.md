@@ -49,7 +49,7 @@ automates the process of signing and allows to make requests to AWS as simple as
   In order to shorten the length of docker commands, you can add the following alias:
 
   ```
-  $ alias awscurl='docker run --rm -ti -v "$HOME/.aws:/root/.aws" okigan/awscurl'
+  $ alias awscurl='docker run --rm -ti -v "$HOME/.aws:/root/.aws" -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SECURITY_TOKEN -e AWS_PROFILE okigan/awscurl'
   ```
   This will allow you to run the awscurl from within a Docker container as if it was installed on the host system:
   ```
@@ -60,12 +60,42 @@ automates the process of signing and allows to make requests to AWS as simple as
 * Call S3:
  List bucket content
   ```sh
-  $ awscurl --service s3 https://awscurl-sample-bucket.s3.amazonaws.com
+  $ awscurl --service s3 https://awscurl-sample-bucket.s3.amazonaws.com | tidy -xml -iq
+  <?xml version="1.0" encoding="utf-8"?>
+  <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
+    <Name>awscurl-sample-bucket</Name>
+    <Prefix></Prefix>
+    <Marker></Marker>
+    <MaxKeys>1000</MaxKeys>
+    <IsTruncated>false</IsTruncated>
+    <Contents>
+      <Key>awscurl-sample-file.txt</Key>
+      <LastModified>2017-07-25T21:27:38.000Z</LastModified>
+      <ETag>"d41d8cd98f00b204e9800998ecf8427e"</ETag>
+      <Size>0</Size>
+      <StorageClass>STANDARD</StorageClass>
+    </Contents>
+  </ListBucketResult>
   ```
 
 * Call EC2:
   ```sh
-  $ awscurl --service ec2 'https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15'
+  $ awscurl --service ec2 'https://ec2.amazonaws.com?Action=DescribeRegions&Version=2013-10-15' | tidy -xml -iq 
+  <?xml version="1.0" encoding="utf-8"?>
+  <DescribeRegionsResponse xmlns="http://ec2.amazonaws.com/doc/2013-10-15/">
+
+    <requestId>96511ccd-2d6d-4d63-ad9b-6be6f2c9874d</requestId>
+    <regionInfo>
+      <item>
+        <regionName>eu-north-1</regionName>
+        <regionEndpoint>ec2.eu-north-1.amazonaws.com</regionEndpoint>
+      </item>
+      <item>
+        <regionName>ap-south-1</regionName>
+        <regionEndpoint>ec2.ap-south-1.amazonaws.com</regionEndpoint>
+      </item>
+    </regionInfo>
+  </DescribeRegionsResponse>
   ```
 
 * Call API Gateway:
