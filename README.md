@@ -160,6 +160,8 @@ uses `default`.
     * https://github.com/legal90/awscurl
   * awscurl in Lisp: https://github.com/aw/picolisp-awscurl
   * awscurl on DockerHub: https://hub.docker.com/r/okigan/awscurl
+  * [aws-signature-proxy](https://github.com/sverch/aws-signature-proxy) and related [blog post](https://shaunverch.com/butter/open-source/2019/09/27/butter-days-6.html)
+  * [aws-sigv4-proxy](https://github.com/awslabs/aws-sigv4-proxy) on awslabs
 
 ## Last but not least
   * [Sponsor awscurl](https://github.com/sponsors/okigan)
