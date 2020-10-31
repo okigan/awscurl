@@ -7,10 +7,11 @@ from __future__ import print_function
 import datetime
 import hashlib
 import hmac
+import json
 import os
 import pprint
-import sys
 import re
+import sys
 
 import configparser
 import configargparse
@@ -351,6 +352,18 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
             config.read(credentials_path)
 
             while True:
+                if access_key is None and config.has_option(profile, "credential_process"):
+                    cmd = config.get(profile, "credential_process")
+                    stream = os.popen(cmd)
+                    json_profile = stream.read()
+                    process_profile = json.loads(json_profile)
+
+                    access_key = process_profile["AccessKeyId"]
+                    secret_key = process_profile["SecretAccessKey"]
+                    security_token = process_profile["SessionToken"]
+                else:
+                    break
+
                 if access_key is None and config.has_option(profile, "aws_access_key_id"):
                     access_key = config.get(profile, "aws_access_key_id")
                 else:
