@@ -485,7 +485,7 @@ def inner_main(argv):
                             args.secret_key,
                             args.session_token,
                             args.data_binary,
-                            args.insecure)
+                            verify=not args.insecure)
 
     if args.include or IS_VERBOSE:
         print(response.headers, end='\n\n')
