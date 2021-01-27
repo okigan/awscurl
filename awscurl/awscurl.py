@@ -416,9 +416,8 @@ def inner_main(argv):
                         default='GET')
     parser.add_argument('-d', '--data', help='HTTP POST data', default='')
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
-    parser.add_argument('-k', '--insecure', action='store_false',
-                        help='This option allows awscurl to proceed and operate even for server '
-                             'connections otherwise considered insecure')
+    parser.add_argument('-k', '--insecure', action='store_true', default=False,
+                        help='Allow insecure server connections when using SSL')
 
     parser.add_argument('--data-binary', action='store_true',
                         help='Process HTTP POST data exactly as specified with '
