@@ -1,9 +1,9 @@
 language: python
 python:
-  - "2.7"
   - "3.6"
   - "3.7"
   - "3.8"
+  - "3.9"
 # command to install dependencies
 install:
   - pip install -r requirements.txt
@@ -16,4 +16,3 @@ env:
 script:
   - pycodestyle -v awscurl
   - pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html --cov-report annotate
-
