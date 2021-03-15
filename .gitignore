@@ -8,3 +8,5 @@
 /.tox/
 **/*,cover
 /htmlcov/
+/.cache/pip/
+/.local/

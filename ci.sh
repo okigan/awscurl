@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
-virtualenv venv -p python2.7
+set -o errexit
+set -o pipefail
+set -o nounset
+set -o xtrace
 
-source venv/bin/activate
-
-pip install -r requirements.txt
-pip install -r requirements-test.txt
-
-pycodestyle -v awscurl
-
-pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html --cov-report annotate
+tox
