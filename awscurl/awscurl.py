@@ -132,9 +132,9 @@ def make_request(method,
     headers.update(auth_headers)
 
     if data_binary:
-        return __send_request(uri, data, headers, method, verify)
-    else:
         return __send_request(uri, data.encode('utf-8'), headers, method, verify)
+    else:
+        return __send_request(uri, data, headers, method, verify)
 
 
 # pylint: disable=too-many-arguments,too-many-locals
@@ -197,7 +197,7 @@ def task_1_create_a_canonical_request(
 
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
-    payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
+    payload_hash = sha256_hash(data)
 
     # Step 7: Combine elements to create create canonical request
     canonical_request = (method + '\n' +
@@ -448,8 +448,12 @@ def inner_main(argv):
 
     if data is not None and data.startswith("@"):
         filename = data[1:]
-        with open(filename, "r") as post_data_file:
-            data = post_data_file.read()
+        if args.data_binary:
+            with open(filename, "r", encoding='UTF-8') as post_data_file:
+                data = post_data_file.read()
+        else:
+            with open(filename, "r") as post_data_file:
+                data = post_data_file.read()
 
     if args.header is None:
         args.header = default_headers
