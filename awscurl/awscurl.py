@@ -387,7 +387,7 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
 
         if botocore:
             import botocore.session
-            session = botocore.session.get_session()
+            session = botocore.session.Session(profile=profile)
             cred = session.get_credentials()
             access_key, secret_key, security_token = cred.access_key, cred.secret_key, cred.token
 
