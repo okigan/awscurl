@@ -65,7 +65,8 @@ def make_request(method,
                  secret_key,
                  security_token,
                  data_binary,
-                 verify=True):
+                 verify=True,
+                 allow_redirects=False):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -82,6 +83,7 @@ def make_request(method,
     :param security_token: str
     :param data_binary: bool
     :param verify: bool
+    :param allow_redirects: false
 
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
@@ -132,9 +134,9 @@ def make_request(method,
     headers.update(auth_headers)
 
     if data_binary:
-        return __send_request(uri, data, headers, method, verify)
+        return __send_request(uri, data, headers, method, verify, allow_redirects)
     else:
-        return __send_request(uri, data.encode('utf-8'), headers, method, verify)
+        return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects)
 
 
 # pylint: disable=too-many-arguments,too-many-locals
@@ -320,14 +322,14 @@ def __now():
     return datetime.datetime.utcnow()
 
 
-def __send_request(uri, data, headers, method, verify):
+def __send_request(uri, data, headers, method, verify, allow_redirects):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
     __log(headers)
 
     __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
     __log('Request URL = ' + uri)
 
-    response = requests.request(method, uri, headers=headers, data=data, verify=verify)
+    response = requests.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % response.status_code)
@@ -433,6 +435,8 @@ def inner_main(argv):
     # https://github.com/boto/botocore/blob/c76553d3158b083d818f88c898d8f6d7918478fd/botocore/credentials.py#L260-262
     parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
     parser.add_argument('--session_token', env_var='AWS_SESSION_TOKEN')
+    parser.add_argument('-L', '--location', action='store_true', default=False, 
+                        help="Follow redirects")
 
     parser.add_argument('uri')
 
@@ -484,7 +488,8 @@ def inner_main(argv):
                             args.secret_key,
                             args.session_token,
                             args.data_binary,
-                            verify=not args.insecure)
+                            verify=not args.insecure,
+                            allow_redirects=args.location)
 
     if args.include or IS_VERBOSE:
         print(response.headers, end='\n\n')
