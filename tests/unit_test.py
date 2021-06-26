@@ -50,7 +50,7 @@ def my_mock_send_request_verify():
     class Object():
         pass
 
-    def ss(uri, data, headers, method, verify, **kargs):
+    def ss(uri, data, headers, method, verify, allow_redirects, **kargs):
         print("in mock")
         if not verify:
             raise SSLError
@@ -121,7 +121,8 @@ class TestMakeRequestVerifySSLRaises(TestCase):
                   'secret_key': '',
                   'security_token': '',
                   'data_binary': False,
-                  'verify': False}
+                  'verify': False,
+                  'allow_redirects': False}
 
         with pytest.raises(SSLError):
             make_request(**params)
@@ -145,7 +146,8 @@ class TestMakeRequestVerifySSLPass(TestCase):
                   'secret_key': '',
                   'security_token': '',
                   'data_binary': False,
-                  'verify': True}
+                  'verify': True,
+                  'allow_redirects': False}
         make_request(**params)
 
         expected = {'x-amz-date': '19700101T000000Z',
