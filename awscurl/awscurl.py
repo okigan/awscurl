@@ -12,6 +12,8 @@ import pprint
 import sys
 import re
 
+import urllib
+
 import configparser
 import configargparse
 import requests
@@ -141,6 +143,16 @@ def make_request(method,
         return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects)
 
 
+def remove_default_port(parsed_url):
+    default_ports = { 'http': 80, 'https': 443 }
+    if any(parsed_url.scheme == scheme and parsed_url.port == port
+           for scheme, port in default_ports.items()):
+        host = parsed_url.hostname
+    else:
+        host = parsed_url.netloc
+    return host
+
+
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
@@ -179,6 +191,8 @@ def task_1_create_a_canonical_request(
         fullhost = headers['host']
     else:
         fullhost = host + ':' + port if port else host
+
+    fullhost = remove_default_port(urllib.parse.urlparse('//' + fullhost))
 
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
