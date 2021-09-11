@@ -10,7 +10,7 @@
 
 
 
-Curl like tool with AWS Signature Version 4 request signing.
+curl-like tool with AWS Signature Version 4 request signing.
 
 ## Features
   * performes requests to AWS services with requests signing using curl interface
