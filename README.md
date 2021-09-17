@@ -6,8 +6,7 @@
 
 
 
-![CI badge](https://github.com/okigan/awscurl/workflows/CI/badge.svg?branch=master)
-
+![CI badge](https://github.com/okigan/awscurl/workflows/CI/badge.svg?branch=master) [![Donate](https://img.shields.io/badge/edit-now-orange.svg?style=flat-square)](https://gitpod.io/#https://github.com/okigan/awscurl)
 
 
 curl-like tool with AWS Signature Version 4 request signing.
