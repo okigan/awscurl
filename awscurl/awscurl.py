@@ -16,6 +16,7 @@ import configparser
 import configargparse
 import requests
 from requests.structures import CaseInsensitiveDict
+from urllib.parse import urlencode
 
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
@@ -315,9 +316,9 @@ def __normalize_query_string(query):
                        for s in query.split('&')
                        if len(s) > 0)
 
-    normalized = '&'.join('%s=%s' % (p[0], p[1] if len(p) > 1 else '')
-                          for p in sorted(parameter_pairs))
-    return normalized
+    normalized_pairs = [(p[0], p[1] if len(p) > 1 else '')
+                        for p in [p for p in sorted(parameter_pairs)]]
+    return urlencode(normalized_pairs)
 
 
 def __now():

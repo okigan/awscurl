@@ -45,6 +45,33 @@ class TestStages(TestCase):
                          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
         self.assertEqual(signed_headers, "host;x-amz-date")
 
+    def test_task_1_create_a_canonical_request_url_encode_querystring(self):
+        """
+        Test that canonical requests correctly sort and url encode querystring parameters.
+        """
+        canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
+            query="arg1=true&arg3=c,b,a&arg2=false&noEncoding=ABC-abc_1.23~tilde",
+            headers="{'Content-Type': 'application/json', 'Accept': 'application/xml'}",
+            port=None,
+            host="my-gateway-id.execute-api.us-east-1.amazonaws.com",
+            amzdate="20190921T022008Z",
+            method="GET",
+            data="",
+            security_token=None,
+            data_binary=False,
+            canonical_uri="/stage/my-path")
+        self.assertEqual(canonical_request, "GET\n"
+                         "/stage/my-path\n"
+                         "arg1=true&arg2=false&arg3=c%2Cb%2Ca&noEncoding=ABC-abc_1.23~tilde\n"
+                         "host:my-gateway-id.execute-api.us-east-1.amazonaws.com\n"
+                         "x-amz-date:20190921T022008Z\n"
+                         "\n"
+                         "host;x-amz-date\n"
+                         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        self.assertEqual(payload_hash,
+                         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+        self.assertEqual(signed_headers, "host;x-amz-date")
+
     def test_task_2_create_the_string_to_sign(self):
         """
         Test the next function that is creating a string in exactly the same way as AWS is on the
