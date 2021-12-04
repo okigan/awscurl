@@ -2,14 +2,13 @@
 # -*- coding: UTF-8 -*-
 
 import datetime
-import logging
 import sys
 
 from unittest import TestCase
 
 from mock import patch
 
-from awscurl.awscurl import make_request
+from awscurl.awscurl import aws_url_encode, make_request
 
 from requests.exceptions import SSLError
 from requests import Response
@@ -318,3 +317,13 @@ class TestRequestResponse(TestCase):
         self.assertFalse(expected in str(r.text.encode('utf-8')))
 
     pass
+
+class TestAwsUrlEncode(TestCase):
+  def test_aws_url_encode(self):
+    self.assertEqual(aws_url_encode(""), "")
+    self.assertEqual(aws_url_encode("AZaz09-_.~"), "AZaz09-_.~")
+    self.assertEqual(aws_url_encode(" /:@[`{"), "%20%2F%3A%40%5B%60%7B")
+    self.assertEqual(aws_url_encode("a=,=b"), "a==%2C==b")
+    self.assertEqual(aws_url_encode("\u0394-\u30a1"), "%CE%94-%E3%82%A1")
+
+  pass

@@ -50,7 +50,7 @@ class TestStages(TestCase):
         Test that canonical requests correctly sort and url encode querystring parameters.
         """
         canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
-            query="arg1=true&arg3=c,b,a&arg2=false&noEncoding=ABC-abc_1.23~tilde",
+            query="arg1=true&arg3=c,b,a&arg2=false&noEncoding=ABC-abc_1.23~tilde/slash",
             headers="{'Content-Type': 'application/json', 'Accept': 'application/xml'}",
             port=None,
             host="my-gateway-id.execute-api.us-east-1.amazonaws.com",
@@ -62,7 +62,7 @@ class TestStages(TestCase):
             canonical_uri="/stage/my-path")
         self.assertEqual(canonical_request, "GET\n"
                          "/stage/my-path\n"
-                         "arg1=true&arg2=false&arg3=c%2Cb%2Ca&noEncoding=ABC-abc_1.23~tilde\n"
+                         "arg1=true&arg2=false&arg3=c%2Cb%2Ca&noEncoding=ABC-abc_1.23~tilde%2Fslash\n"
                          "host:my-gateway-id.execute-api.us-east-1.amazonaws.com\n"
                          "x-amz-date:20190921T022008Z\n"
                          "\n"

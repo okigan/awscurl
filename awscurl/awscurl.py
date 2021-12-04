@@ -16,7 +16,7 @@ import configparser
 import configargparse
 import requests
 from requests.structures import CaseInsensitiveDict
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
@@ -316,9 +316,22 @@ def __normalize_query_string(query):
                        for s in query.split('&')
                        if len(s) > 0)
 
-    normalized_pairs = [(p[0], p[1] if len(p) > 1 else '')
-                        for p in [p for p in sorted(parameter_pairs)]]
-    return urlencode(normalized_pairs)
+    normalized = '&'.join('%s=%s' % (aws_url_encode(p[0]), aws_url_encode(p[1]) if len(p) > 1 else '')
+                          for p in sorted(parameter_pairs))
+    return normalized
+
+
+def aws_url_encode(text):
+    """
+    URI-encode each parameter name and value according to the following rules:
+    - Do not URI-encode any of the unreserved characters that RFC 3986 defines: A-Z, a-z, 0-9, hyphen (-),
+      underscore (_), period (.), and tilde (~).
+    - Percent-encode all other characters with %XY, where X and Y are hexadecimal characters (0-9 and uppercase A-F).
+      For example, the space character must be encoded as %20 (not using '+', as some encoding schemes do) and
+      extended UTF-8 characters must be in the form %XY%ZA%BC.
+    - Double-encode any equals (=) characters in parameter values.
+    """
+    return quote(text, safe='~=').replace('=', '==')
 
 
 def __now():
