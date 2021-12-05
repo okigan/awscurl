@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='awscurl',
-    version='0.24',
+    version='0.25',
     description='Curl like tool with AWS request signing',
     url='http://github.com/okigan/awscurl',
     author='Igor Okulist',
