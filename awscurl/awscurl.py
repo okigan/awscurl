@@ -512,7 +512,7 @@ def inner_main(argv):
         print(response.headers, end='\n\n')
     elif IS_VERBOSE:
         pprint.PrettyPrinter(stream=sys.stderr).pprint(response.headers)
-        pprint.PrettyPrinter(stream=sys.stderr).pprint()
+        pprint.PrettyPrinter(stream=sys.stderr).pprint('')
         
     print(response.text)
 
