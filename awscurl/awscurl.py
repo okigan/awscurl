@@ -508,8 +508,12 @@ def inner_main(argv):
                             verify=not args.insecure,
                             allow_redirects=args.location)
 
-    if args.include or IS_VERBOSE:
+    if args.include:
         print(response.headers, end='\n\n')
+    elif IS_VERBOSE:
+        pprint.PrettyPrinter(stream=sys.stderr).pprint(response.headers)
+        pprint.PrettyPrinter(stream=sys.stderr).pprint('')
+        
     print(response.text)
 
     response.raise_for_status()
