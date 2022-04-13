@@ -6,7 +6,7 @@
 ![CI badge](https://github.com/okigan/awscurl/workflows/CI/badge.svg?branch=master) 
 
 [![Edit with gitpod](https://img.shields.io/badge/edit--with-gitpod-blue.svg?style=flat-square)](https://gitpod.io/#https://github.com/okigan/awscurl)
-[![Edit with vscode](https://img.shields.io/badge/edit--with-vscode-blue.svg?style=flat-square)](https://vscode.com/github/okigan/awscurl)
+[![Edit with vscode](https://img.shields.io/badge/edit--with-vscode-blue.svg?style=flat-square)](https://vscode.dev/github/okigan/awscurl)
 [![Edit with github codespaces](https://img.shields.io/badge/edit--with-codespaces-blue.svg?style=flat-square)](https://github.dev/okigan/awscurl)
 
 
