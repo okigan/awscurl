@@ -359,6 +359,10 @@ def __send_request(uri, data, headers, method, verify, allow_redirects):
     __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
     __log('Request URL = ' + uri)
 
+    if (verify == False):
+        import urllib3
+        urllib3.disable_warnings()
+
     response = requests.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
