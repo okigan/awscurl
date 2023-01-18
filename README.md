@@ -13,13 +13,13 @@ curl-like tool with AWS Signature Version 4 request signing.
 
 ## Features
 
-* performes requests to AWS services with requests signing using curl interface
+* performs requests to AWS services with request signing using curl interface
 * supports IAM profile credentials
 
 ## Overview
 
 Requests to AWS API must be signed (see [Signing AWS API Requests](http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html))
-automates the process of signing and allows to make requests to AWS as simple as standard curl command.
+automates the process of signing and makes requests to AWS as simple as a standard curl command.
 
 ## Installation
 
@@ -66,7 +66,7 @@ docker pull ghcr.io/okigan/awscurl
   alias awscurl='docker run --rm -ti -v "$HOME/.aws:/root/.aws" -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SECURITY_TOKEN -e AWS_PROFILE okigan/awscurl'
   ```
 
-  This will allow you to run the awscurl from within a Docker container as if it was installed on the host system:
+  This will allow you to run awscurl from within a Docker container as if it was installed on the host system:
 
   ```sh
   awscurl
