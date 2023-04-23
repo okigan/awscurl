@@ -8,6 +8,7 @@ jobs:
       matrix:
         runs-on: [ubuntu-20.04, macOS-latest]
         python-version: [ '3.6.14', '3.8', '3.9']
+      fail-fast: false
 
     runs-on: ${{ matrix.runs-on }}
 
