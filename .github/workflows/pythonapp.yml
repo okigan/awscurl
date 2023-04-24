@@ -42,6 +42,6 @@ jobs:
           pycodestyle -v awscurl
       - name: Test with pytest
         run: |
-          pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html --cov-report annotate
+          pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html
       - name: Test with tox
         run: tox -vv
