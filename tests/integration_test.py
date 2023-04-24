@@ -5,6 +5,20 @@ import base64
 
 from unittest import TestCase
 
+import sys
+import os
+
+# this block resolves issues with pytest/tox, overall project dir structure
+# should be updated, some hints at can be found here: 
+# https://stackoverflow.com/questions/55737714/how-does-a-tox-environment-set-its-sys-path
+print(f'sys.path={sys.path}')
+this_script_dir=os.path.dirname(os.path.abspath(__file__))
+extra_path=os.path.join(this_script_dir, '..', 'awscurl')
+if not os.path.exists(extra_path):
+    print(f'extra_path does not exist: {extra_path}')
+sys.path.append(extra_path)
+print(f'sys.path2={sys.path}')
+
 import pytest
 from mock import patch
 from requests import HTTPError
