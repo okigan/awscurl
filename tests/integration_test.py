@@ -21,7 +21,6 @@ print(f'sys.path2={sys.path}')
 
 import pytest
 from mock import patch
-from requests import HTTPError
 
 from awscurl.awscurl import make_request, inner_main
 
@@ -123,5 +122,8 @@ class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
 class TestInnerMainMethod(TestCase):
     maxDiff = None
 
-    with pytest.raises(HTTPError):
-        inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com'])
+    def test_exit_code(self, *args, **kwargs):
+        self.assertEqual(
+            inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
+            1
+        )
