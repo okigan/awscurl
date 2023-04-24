@@ -145,7 +145,7 @@ def make_request(method,
 
 
 def remove_default_port(parsed_url):
-    default_ports = { 'http': 80, 'https': 443 }
+    default_ports = {'http': 80, 'https': 443}
     if any(parsed_url.scheme == scheme and parsed_url.port == port
            for scheme, port in default_ports.items()):
         host = parsed_url.hostname
@@ -359,7 +359,7 @@ def __send_request(uri, data, headers, method, verify, allow_redirects):
     __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
     __log('Request URL = ' + uri)
 
-    if (verify == False):
+    if (verify is False):
         import urllib3
         urllib3.disable_warnings()
 
@@ -469,7 +469,7 @@ def inner_main(argv):
     # https://github.com/boto/botocore/blob/c76553d3158b083d818f88c898d8f6d7918478fd/botocore/credentials.py#L260-262
     parser.add_argument('--security_token', env_var='AWS_SECURITY_TOKEN')
     parser.add_argument('--session_token', env_var='AWS_SESSION_TOKEN')
-    parser.add_argument('-L', '--location', action='store_true', default=False, 
+    parser.add_argument('-L', '--location', action='store_true', default=False,
                         help="Follow redirects")
 
     parser.add_argument('uri')
@@ -531,7 +531,7 @@ def inner_main(argv):
     elif IS_VERBOSE:
         pprint.PrettyPrinter(stream=sys.stderr).pprint(response.headers)
         pprint.PrettyPrinter(stream=sys.stderr).pprint('')
-        
+
     print(response.text)
 
     response.raise_for_status()
