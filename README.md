@@ -1,7 +1,7 @@
 # awscurl [![Donate](https://img.shields.io/badge/donate-github-orange.svg?style=flat-square)](https://github.com/sponsors/okigan) [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg?style=flat-square)](https://www.paypal.com/donate/?business=UDN4FL55J34QC&amount=25) [![Donate](https://img.shields.io/badge/donate-buy_me_a_coffee-orange.svg?style=flat-square)](https://www.buymeacoffee.com/okigan)
 
 [![PyPI](https://img.shields.io/pypi/v/awscurl.svg)](https://pypi.python.org/pypi/awscurl)
-[![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
+[![Build Status](https://github.com/okigan/awscurl/actions/workflows/pythonapp.yml/badge.svg)](https://github.com/okigan/awscurl)
 [![Docker Hub](https://img.shields.io/docker/pulls/okigan/awscurl.svg)](https://hub.docker.com/r/okigan/awscurl)
 ![CI badge](https://github.com/okigan/awscurl/workflows/CI/badge.svg?branch=master)
 
