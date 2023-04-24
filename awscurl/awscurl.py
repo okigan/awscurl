@@ -534,9 +534,9 @@ def inner_main(argv):
 
     print(response.text)
 
-    response.raise_for_status()
+    exit_code = 0 if response.ok else 1
 
-    return 0
+    return exit_code
 
 
 def main():
