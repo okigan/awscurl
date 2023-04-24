@@ -4,13 +4,16 @@ from setuptools import setup
 
 setup(
     name='awscurl',
-    version='0.26',
+    version='0.27',
     description='Curl like tool with AWS request signing',
     url='http://github.com/okigan/awscurl',
     author='Igor Okulist',
     author_email='okigan@gmail.com',
     license='MIT',
     packages=['awscurl'],
+    # package_data={
+    #     'tests': ['*.py'],
+    # },
     entry_points={
         'console_scripts': [
             'awscurl = awscurl.__main__:main',
