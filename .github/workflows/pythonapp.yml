@@ -6,8 +6,9 @@ jobs:
   build:
     strategy:
       matrix:
-        runs-on: [ubuntu-latest, macOS-latest]
+        runs-on: [ubuntu-20.04, macOS-latest]
         python-version: [ '3.6', '3.8', '3.9']
+      fail-fast: false
 
     runs-on: ${{ matrix.runs-on }}
 
@@ -40,4 +41,4 @@ jobs:
         run: |
           pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html --cov-report annotate
       - name: Test with tox
-        run: tox
+        run: tox -vv
