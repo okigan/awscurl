@@ -47,4 +47,3 @@ class TestUriParsing(TestCase):
                           'query': '',
                           'schema': 'http',
                           'user': None})
-

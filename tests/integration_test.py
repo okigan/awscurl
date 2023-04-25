@@ -19,10 +19,8 @@ if not os.path.exists(extra_path):
 sys.path.append(extra_path)
 print(f'sys.path2={sys.path}')
 
-import pytest
-from mock import patch
+from awscurl.awscurl import make_request, inner_main  # nopep8: E402
 
-from awscurl.awscurl import make_request, inner_main
 
 __author__ = 'iokulist'
 

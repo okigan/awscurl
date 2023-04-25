@@ -5,10 +5,11 @@ set -o pipefail
 set -o nounset
 set -o xtrace
 
-images=("ubuntu" "centos")
+docker build -t awscurl-ci-ubuntu -f ./ci/ci-ubuntu/Dockerfile .
+docker run   -t awscurl-ci-ubuntu bash -c "source /root/venv/bin/activate && cd dd && tox" 
 
-for image in "${images[@]}"
-do
-#  echo $image
-  docker run -it -v $(pwd):/root "${image}" bash -c "cd && ./install.sh && ./ci.sh"
-done
+docker build -t awscurl-ci-alpine -f ./ci/ci-alpine/Dockerfile .
+docker run   -t awscurl-ci-alpine bash -c "source /root/venv/bin/activate && cd dd && tox" 
+
+docker build -t awscurl-ci-centos -f ./ci/ci-centos/Dockerfile .
+docker run   -t awscurl-ci-centos bash -c "source /root/venv/bin/activate && cd dd && tox" 

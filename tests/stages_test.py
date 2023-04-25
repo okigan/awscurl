@@ -11,6 +11,7 @@ from awscurl.awscurl import (
     task_3_calculate_the_signature,
     task_4_build_auth_headers_for_the_request)
 
+
 class TestStages(TestCase):
     """
     Suite to test all stages.
