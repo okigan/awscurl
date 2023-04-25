@@ -16,7 +16,7 @@ class Test__load_aws_config(TestCase):
                                                            "./tests/data/credentials",
                                                            "default")
 
-        self.assertEquals([access_key, secret_access, token], ['access_key_id', 'secret_access_key', None])
+        self.assertEqual([access_key, secret_access, token], ['access_key_id', 'secret_access_key', None])
 
         access_key, secret_access, token = load_aws_config(None,
                                                            None,
@@ -24,7 +24,7 @@ class Test__load_aws_config(TestCase):
                                                            "./tests/data/credentials",
                                                            "default")
 
-        self.assertEquals([access_key, secret_access, token], ['access_key_id', 'secret_access_key', 'ttt'])
+        self.assertEqual([access_key, secret_access, token], ['access_key_id', 'secret_access_key', 'ttt'])
 
         # TODO: remove this test as I think it's not valid to loads secret_key if session_key was already provided
         # access_key, secret_access, token = load_aws_config('aaa',
