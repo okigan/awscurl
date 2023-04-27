@@ -8,21 +8,22 @@ RUN yum install -y libffi-devel readline-devel zlib-devel bzip2-devel sqlite-dev
 RUN curl https://pyenv.run | bash
 
 ENV PATH="/root/.pyenv/bin:$PATH"
-
 RUN eval "$(pyenv init -)" && \
     eval "$(pyenv virtualenv-init -)"
 
+
+WORKDIR /root/workdir
 COPY .python-version .python-version
-RUN cat .python-version | xargs -n 1 /root/.pyenv/bin/pyenv install
+RUN for version in $(cat .python-version); do \
+    /root/.pyenv/bin/pyenv install $version; \
+done
 
-RUN /root/.pyenv/versions/3.8*/bin/python -m venv /root/venv
+COPY setup.cfg setup.cfg
+COPY awscurl awscurl
+COPY setup.py setup.py
+COPY scripts/ci.sh scripts/ci.sh
+COPY requirements.txt requirements.txt
+COPY requirements-test.txt requirements-test.txt
+COPY tests tests
 
-RUN bash -c "source /root/venv/bin/activate && pip install tox"
-
-COPY awscurl dd/awscurl
-COPY tox.ini dd/tox.ini
-COPY requirements.txt dd/requirements.txt
-COPY requirements-test.txt dd/requirements-test.txt
-COPY tests dd/tests
-
-RUN bash -c "source /root/venv/bin/activate && cd dd && tox --recreate"
+# RUN bash -c "source /root/venv/bin/activate && cd dd && tox --recreate"

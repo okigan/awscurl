@@ -41,4 +41,3 @@ grep -v '^ *#' < .python-version | while IFS= read -r line
 do
   pyenv install -s "${line}"
 done
-pip install tox
