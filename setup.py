@@ -2,9 +2,9 @@ __author__ = 'iokulist'
 
 from setuptools import setup
 
-
-with open("requirements.txt", "r", encoding="utf-8") as f:
-    requirements = f.read().splitlines()
+# https://github.com/okigan/awscurl/issues/167
+# with open("requirements.txt", "r", encoding="utf-8") as f:
+#     requirements = f.read().splitlines()
 
 # https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html#summary
 
@@ -26,7 +26,12 @@ setup(
         ],
     },
     zip_safe=False,
-    install_requires=requirements,
+    install_requires=[
+        'requests',
+        'configargparse',
+        'configparser',
+        'urllib3[secure]'
+    ],
     extras_require={
         'awslibs': ["botocore"]
     }
