@@ -174,6 +174,10 @@ uses `default`.
 * QnA on [DevOps StackExchange](https://devops.stackexchange.com/search?q=awscurl)
 * Examples on [Golfbert](https://golfbert.com/api/samples)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=okigan/awscurl&type=Date)](https://star-history.com/#okigan/awscurl&Date)
+
 ## Related projects
 
 * awscurl in Go:
