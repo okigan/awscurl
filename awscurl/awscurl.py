@@ -464,7 +464,7 @@ def inner_main(argv):
 
     parser.add_argument('--region', help='AWS region', default='us-east-1',
                         env_var='AWS_DEFAULT_REGION')
-    parser.add_argument('--profile', help='AWS profile', default='default', env_var='AWS_PROFILE')
+    parser.add_argument('--profile', help='AWS profile', env_var='AWS_PROFILE')
     parser.add_argument('--service', help='AWS service', default='execute-api')
     parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
     parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
