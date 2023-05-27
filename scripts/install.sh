@@ -11,6 +11,9 @@ OS_RELEASE=$(. /etc/os-release; echo "${NAME}")
 if [ "${OS_RELEASE}" = "Ubuntu" ]; then
     apt update
     apt install -y sudo
+    echo 'tzdata tzdata/Areas select Europe' | debconf-set-selections
+    echo 'tzdata tzdata/Zones/Europe select Paris' | debconf-set-selections
+    DEBIAN_FRONTEND="noninteractive" apt install -y tzdata
 
     apt install -y curl git \
     build-essential \
@@ -19,7 +22,7 @@ if [ "${OS_RELEASE}" = "Ubuntu" ]; then
     libtool \
     libffi-dev libreadline-dev libz-dev libsqlite-dev libssl-dev \
     libreadline-dev libsqlite3-dev wget curl libncurses5-dev libncursesw5-dev \
-    xz-utils tk-dev libffi-dev liblzma-dev python-openssl git
+    xz-utils tk-dev libffi-dev libbz2-dev liblzma-dev git
 elif [ "${OS_RELEASE}" = "CentOS Linux" ]; then
     yum update -y
     yum group install -y "Development Tools"
@@ -38,4 +41,3 @@ grep -v '^ *#' < .python-version | while IFS= read -r line
 do
   pyenv install -s "${line}"
 done
-pip install tox

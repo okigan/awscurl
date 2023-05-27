@@ -1,7 +1,7 @@
 # awscurl [![Donate](https://img.shields.io/badge/donate-github-orange.svg?style=flat-square)](https://github.com/sponsors/okigan) [![Donate](https://img.shields.io/badge/donate-paypal-orange.svg?style=flat-square)](https://www.paypal.com/donate/?business=UDN4FL55J34QC&amount=25) [![Donate](https://img.shields.io/badge/donate-buy_me_a_coffee-orange.svg?style=flat-square)](https://www.buymeacoffee.com/okigan)
 
 [![PyPI](https://img.shields.io/pypi/v/awscurl.svg)](https://pypi.python.org/pypi/awscurl)
-[![Build Status](https://travis-ci.org/okigan/awscurl.svg?branch=master)](https://travis-ci.org/okigan/awscurl)
+[![Build Status](https://github.com/okigan/awscurl/actions/workflows/pythonapp.yml/badge.svg)](https://github.com/okigan/awscurl)
 [![Docker Hub](https://img.shields.io/docker/pulls/okigan/awscurl.svg)](https://hub.docker.com/r/okigan/awscurl)
 ![CI badge](https://github.com/okigan/awscurl/workflows/CI/badge.svg?branch=master)
 
@@ -13,13 +13,13 @@ curl-like tool with AWS Signature Version 4 request signing.
 
 ## Features
 
-* performes requests to AWS services with requests signing using curl interface
+* performs requests to AWS services with request signing using curl interface
 * supports IAM profile credentials
 
 ## Overview
 
 Requests to AWS API must be signed (see [Signing AWS API Requests](http://docs.aws.amazon.com/general/latest/gr/signing_aws_api_requests.html))
-automates the process of signing and allows to make requests to AWS as simple as standard curl command.
+automates the process of signing and makes requests to AWS as simple as a standard curl command.
 
 ## Installation
 
@@ -66,7 +66,7 @@ docker pull ghcr.io/okigan/awscurl
   alias awscurl='docker run --rm -ti -v "$HOME/.aws:/root/.aws" -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_SECURITY_TOKEN -e AWS_PROFILE okigan/awscurl'
   ```
 
-  This will allow you to run the awscurl from within a Docker container as if it was installed on the host system:
+  This will allow you to run awscurl from within a Docker container as if it was installed on the host system:
 
   ```sh
   awscurl
@@ -173,6 +173,10 @@ uses `default`.
 * QnA on [StackOverflow](https://stackoverflow.com/search?q=awscurl)
 * QnA on [DevOps StackExchange](https://devops.stackexchange.com/search?q=awscurl)
 * Examples on [Golfbert](https://golfbert.com/api/samples)
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=okigan/awscurl)](https://star-history.com/#okigan/awscurl&Date)
 
 ## Related projects
 

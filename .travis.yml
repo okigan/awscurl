@@ -1,6 +1,5 @@
 language: python
 python:
-  - "2.7"
   - "3.6"
   - "3.7"
   - "3.8"
@@ -16,4 +15,4 @@ env:
 # command to run tests
 script:
   - pycodestyle -v awscurl
-  - pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html --cov-report annotate
+  - pytest -v --cov=awscurl --cov-fail-under=77 --cov-report html

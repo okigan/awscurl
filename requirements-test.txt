@@ -2,3 +2,7 @@ pycodestyle
 mock
 pytest
 pytest-cov
+wheel
+setuptools
+setuptools-rust
+build

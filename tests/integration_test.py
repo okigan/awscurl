@@ -5,11 +5,22 @@ import base64
 
 from unittest import TestCase
 
-import pytest
-from mock import patch
-from requests import HTTPError
+import sys
+import os
 
-from awscurl.awscurl import make_request, inner_main
+# this block resolves issues with pytest/tox, overall project dir structure
+# should be updated, some hints at can be found here: 
+# https://stackoverflow.com/questions/55737714/how-does-a-tox-environment-set-its-sys-path
+print(f'sys.path={sys.path}')
+this_script_dir=os.path.dirname(os.path.abspath(__file__))
+extra_path=os.path.join(this_script_dir, '..', 'awscurl')
+if not os.path.exists(extra_path):
+    print(f'extra_path does not exist: {extra_path}')
+sys.path.append(extra_path)
+print(f'sys.path2={sys.path}')
+
+from awscurl.awscurl import make_request, inner_main  # nopep8: E402
+
 
 __author__ = 'iokulist'
 
@@ -109,5 +120,8 @@ class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
 class TestInnerMainMethod(TestCase):
     maxDiff = None
 
-    with pytest.raises(HTTPError):
-        inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com'])
+    def test_exit_code(self, *args, **kwargs):
+        self.assertEqual(
+            inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
+            1
+        )
