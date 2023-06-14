@@ -326,7 +326,7 @@ def task_4_build_auth_headers_for_the_request(
 
 
 def __normalize_query_string(query):
-    parameter_pairs = (list(map(str.strip, s.split("=")))
+    parameter_pairs = (list(map(str.strip, s.split("=", 1)))
                        for s in query.split('&')
                        if len(s) > 0)
 
@@ -345,7 +345,7 @@ def aws_url_encode(text):
       extended UTF-8 characters must be in the form %XY%ZA%BC.
     - Double-encode any equals (=) characters in parameter values.
     """
-    return quote(text, safe='~=').replace('=', '==')
+    return quote(text, safe='~')
 
 
 def __now():
