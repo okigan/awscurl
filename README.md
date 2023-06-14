@@ -77,7 +77,7 @@ docker pull ghcr.io/okigan/awscurl
 * Call S3: List bucket content
 
   ```sh
-  $ awscurl --service s3 https://awscurl-sample-bucket.s3.amazonaws.com | tidy -xml -iq
+  $ awscurl --service s3 'https://awscurl-sample-bucket.s3.amazonaws.com' | tidy -xml -iq
   <?xml version="1.0" encoding="utf-8"?>
   <ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/">
     <Name>awscurl-sample-bucket</Name>
