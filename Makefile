@@ -7,3 +7,9 @@ venv:
 		pip install --upgrade setuptools; \
 		pip install -r requirements.txt -r requirements-test.txt; \
 	)
+
+docker-build:
+	docker build -t awscurl .
+
+docker-run:
+	docker run -it --rm awscurl
