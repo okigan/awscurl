@@ -329,7 +329,7 @@ class TestAwsUrlEncode(TestCase):
         self.assertEqual(aws_url_encode(""), "")
         self.assertEqual(aws_url_encode("AZaz09-_.~"), "AZaz09-_.~")
         self.assertEqual(aws_url_encode(" /:@[`{"), "%20%2F%3A%40%5B%60%7B")
-        self.assertEqual(aws_url_encode("a=,=b"), "a==%2C==b")
+        self.assertEqual(aws_url_encode("a=,=b"), "a%3D%2C%3Db")
         self.assertEqual(aws_url_encode("\u0394-\u30a1"), "%CE%94-%E3%82%A1")
 
     pass
