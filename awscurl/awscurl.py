@@ -317,12 +317,14 @@ def task_4_build_auth_headers_for_the_request(
     # signed_headers, as noted earlier. Order here is not significant.
     # Python note: The 'host' header is added automatically by the Python
     # 'requests' library.
-    return {
+    headers={
         'Authorization': authorization_header,
         'x-amz-date': amzdate,
-        'x-amz-security-token': security_token,
         'x-amz-content-sha256': payload_hash
     }
+    if security_token is not None:
+        headers[ 'x-amz-security-token']=security_token
+    return headers
 
 
 def __normalize_query_string(query):
