@@ -80,7 +80,6 @@ def make_request(method,
     :param uri: str
     :param headers: dict
     :param data: str
-    :param profile: str
     :param access_key: str
     :param secret_key: str
     :param security_token: str
@@ -303,10 +302,10 @@ def task_4_build_auth_headers_for_the_request(
     """
     # Create authorization header and add to request headers
     authorization_header = (
-            algorithm + ' ' +
-            'Credential=' + access_key + '/' + credential_scope + ', ' +
-            'SignedHeaders=' + signed_headers + ', ' +
-            'Signature=' + signature
+        algorithm + ' ' +
+        'Credential=' + access_key + '/' + credential_scope + ', ' +
+        'SignedHeaders=' + signed_headers + ', ' +
+        'Signature=' + signature
     )
 
     # The request can include any headers, but MUST include "host",
