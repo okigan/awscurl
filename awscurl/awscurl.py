@@ -4,22 +4,20 @@ Awscurl implementation
 """
 from __future__ import print_function
 
+import configparser
 import datetime
 import hashlib
 import hmac
 import os
 import pprint
-import sys
 import re
-
+import sys
 import urllib
+from urllib.parse import quote
 
-import configparser
 import configargparse
 import requests
 from requests.structures import CaseInsensitiveDict
-from urllib.parse import quote
-
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
 
@@ -198,7 +196,7 @@ def task_1_create_a_canonical_request(
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
-    canonical_headers = ('host:' + fullhost + '\n' + 
+    canonical_headers = ('host:' + fullhost + '\n' +
                          'x-amz-date:' + amzdate + '\n')
 
     if security_token:
@@ -305,10 +303,10 @@ def task_4_build_auth_headers_for_the_request(
     """
     # Create authorization header and add to request headers
     authorization_header = (
-        algorithm + ' ' +
-        'Credential=' + access_key + '/' + credential_scope + ', ' +
-        'SignedHeaders=' + signed_headers + ', ' +
-        'Signature=' + signature
+            algorithm + ' ' +
+            'Credential=' + access_key + '/' + credential_scope + ', ' +
+            'SignedHeaders=' + signed_headers + ', ' +
+            'Signature=' + signature
     )
 
     # The request can include any headers, but MUST include "host",
@@ -317,13 +315,13 @@ def task_4_build_auth_headers_for_the_request(
     # signed_headers, as noted earlier. Order here is not significant.
     # Python note: The 'host' header is added automatically by the Python
     # 'requests' library.
-    headers={
+    headers = {
         'Authorization': authorization_header,
         'x-amz-date': amzdate,
         'x-amz-content-sha256': payload_hash
     }
     if security_token is not None:
-        headers[ 'x-amz-security-token']=security_token
+        headers['x-amz-security-token'] = security_token
     return headers
 
 
