@@ -8,9 +8,9 @@ set -o xtrace
 docker_run() {
     local image_type=$1
     local script_file=$2
-    echo building "${image_type}" image -- first time it could take a few minutes
-    docker build -t awscurl-ci-"$image_type" -f ./ci/ci-"$image_type"/Dockerfile . && \
-    docker run -t awscurl-ci-"$image_type" bash -c "$script_file"
+    echo "building ${image_type} image -- first time it could take a few minutes"
+    docker build -t "awscurl-ci-${image_type}" -f "./ci/ci-${image_type}/Dockerfile" . &&
+    docker run --rm -t "awscurl-ci-${image_type}" bash -c "${script_file}"
 }
 
 docker_run "ubuntu" "./scripts/ci.sh"
