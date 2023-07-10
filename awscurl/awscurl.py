@@ -13,12 +13,12 @@ import sys
 import re
 
 import urllib
+from urllib.parse import quote
 
 import configparser
 import configargparse
 import requests
 from requests.structures import CaseInsensitiveDict
-from urllib.parse import quote
 
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
@@ -82,7 +82,6 @@ def make_request(method,
     :param uri: str
     :param headers: dict
     :param data: str
-    :param profile: str
     :param access_key: str
     :param secret_key: str
     :param security_token: str
@@ -198,7 +197,7 @@ def task_1_create_a_canonical_request(
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
-    canonical_headers = ('host:' + fullhost + '\n' + 
+    canonical_headers = ('host:' + fullhost + '\n' +
                          'x-amz-date:' + amzdate + '\n')
 
     if security_token:
@@ -317,12 +316,14 @@ def task_4_build_auth_headers_for_the_request(
     # signed_headers, as noted earlier. Order here is not significant.
     # Python note: The 'host' header is added automatically by the Python
     # 'requests' library.
-    return {
+    headers = {
         'Authorization': authorization_header,
         'x-amz-date': amzdate,
-        'x-amz-security-token': security_token,
         'x-amz-content-sha256': payload_hash
     }
+    if security_token is not None:
+        headers['x-amz-security-token'] = security_token
+    return headers
 
 
 def __normalize_query_string(query):
