@@ -4,20 +4,22 @@ Awscurl implementation
 """
 from __future__ import print_function
 
-import configparser
 import datetime
 import hashlib
 import hmac
 import os
 import pprint
-import re
 import sys
+import re
+
 import urllib
 from urllib.parse import quote
 
+import configparser
 import configargparse
 import requests
 from requests.structures import CaseInsensitiveDict
+
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
 
