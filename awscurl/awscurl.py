@@ -197,7 +197,7 @@ def task_1_create_a_canonical_request(
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
-    canonical_headers = ('host:' + fullhost + '\n' +
+    canonical_headers = ('host:' + fullhost.lower() + '\n' +
                          'x-amz-date:' + amzdate + '\n')
 
     if security_token:
