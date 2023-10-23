@@ -8,17 +8,18 @@ RUN set -ex && \
   libxml2-dev \
   openssl-dev
 
+RUN pip install --user botocore
+
 COPY . /app-source-dir
 
-RUN pip install --target=/app/python-packages ./app-source-dir 
+RUN pip install -v --user /app-source-dir 
 
 
 # Runtime stage
 FROM python:3-alpine
 
-COPY --from=builder /app /app
+COPY --from=builder /root/.local /root/.local 
 
-ENV PATH=/app/python-packages/bin:${PATH}
-ENV PYTHONPATH=/app/python-packages
+ENV PATH=/root/.local/bin/:${PATH}
 
 ENTRYPOINT ["awscurl"]
