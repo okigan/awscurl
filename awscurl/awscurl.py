@@ -472,6 +472,7 @@ def inner_main(argv):
     parser.add_argument('--session_token', env_var='AWS_SESSION_TOKEN')
     parser.add_argument('-L', '--location', action='store_true', default=False,
                         help="Follow redirects")
+    parser.add_argument('-o', '--output', metavar="<file>", help='Write to file instead of stdout', default='')
 
     parser.add_argument('uri')
 
@@ -534,6 +535,12 @@ def inner_main(argv):
         pprint.PrettyPrinter(stream=sys.stderr).pprint('')
 
     print(response.text)
+
+    if args.output:
+        filename = args.output
+        file_mode = "wb" if args.data_binary else "w"
+        with open(filename, file_mode) as f:
+            f.write(response.content)
 
     exit_code = 0 if response.ok else 1
 
