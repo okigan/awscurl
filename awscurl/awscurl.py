@@ -74,7 +74,7 @@ def make_request(method,
                  verify=True,
                  allow_redirects=False,
                  *,
-                 files = None):
+                 files=None):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -356,7 +356,7 @@ def __now():
     return datetime.datetime.utcnow()
 
 
-def __send_request(uri, data, headers, method, verify, allow_redirects, *, files = None):
+def __send_request(uri, data, headers, method, verify, allow_redirects, *, files=None):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
     __log(headers)
 
@@ -433,6 +433,7 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
 
     return access_key, secret_key, security_token
 
+
 def __process_form_data(form_data: List[str]) -> List[Tuple[str, Union[str, Tuple[str, Union[IO, Tuple[IO, str]]]]]]:
     """
     Process form data to prepare files for uploading with optional MIME types,
@@ -473,7 +474,7 @@ def __process_form_data(form_data: List[str]) -> List[Tuple[str, Union[str, Tupl
         for part in parts[1:]:
             if part.startswith('type='):
                 mime_type = part[5:]
-        
+
         # Adding the file to the list, including the MIME type if specified
         file_tuple = (file_path, (open(file_path, 'rb'), mime_type)) if mime_type else (file_path, open(file_path, 'rb'))
         files.append((field_name, file_tuple))
