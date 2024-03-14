@@ -6,3 +6,4 @@ wheel
 setuptools
 setuptools-rust
 build
+mypy

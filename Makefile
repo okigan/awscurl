@@ -6,6 +6,7 @@ venv:
 		pip install --upgrade pip; \
 		pip install --upgrade setuptools; \
 		pip install -r requirements.txt -r requirements-test.txt; \
+		mypy --install-types --non-interactive; \
 	)
 
 docker-build:

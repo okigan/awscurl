@@ -12,6 +12,7 @@ import pprint
 import sys
 import re
 
+from typing import IO, List, Tuple, Union
 import urllib
 from urllib.parse import quote
 
@@ -71,7 +72,9 @@ def make_request(method,
                  security_token,
                  data_binary,
                  verify=True,
-                 allow_redirects=False):
+                 allow_redirects=False,
+                 *,
+                 files = None):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -138,9 +141,9 @@ def make_request(method,
     headers.update(auth_headers)
 
     if data_binary:
-        return __send_request(uri, data, headers, method, verify, allow_redirects)
+        return __send_request(uri, data, headers, method, verify, allow_redirects, files=files)
     else:
-        return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects)
+        return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects, files=files)
 
 
 def remove_default_port(parsed_url):
@@ -353,7 +356,7 @@ def __now():
     return datetime.datetime.utcnow()
 
 
-def __send_request(uri, data, headers, method, verify, allow_redirects):
+def __send_request(uri, data, headers, method, verify, allow_redirects, *, files = None):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
     __log(headers)
 
@@ -364,7 +367,7 @@ def __send_request(uri, data, headers, method, verify, allow_redirects):
         import urllib3
         urllib3.disable_warnings()
 
-    response = requests.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
+    response = requests.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects, files=files)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % response.status_code)
@@ -430,6 +433,52 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
 
     return access_key, secret_key, security_token
 
+def __process_form_data(form_data: List[str]) -> List[Tuple[str, Union[str, Tuple[str, Union[IO, Tuple[IO, str]]]]]]:
+    """
+    Process form data to prepare files for uploading with optional MIME types,
+    supporting specific form field names for each file.
+
+    Args:
+        form_data (list of str): Each string in the list should be formatted as
+                                 'fieldname=@filepath[;type=mimetype]'.
+
+    Examples:
+        - Simple file upload with field name:
+          'profile=@portrait.jpg'
+          This will upload a file located at 'portrait.jpg' with the field name 'profile'.
+
+        - File upload with field name and MIME type:
+          'document=@report.pdf;type=application/pdf'
+          This uploads 'report.pdf' as 'document', with an explicit MIME type 'application/pdf'.
+
+        - Multiple file uploads:
+          ['photo=@vacation.jpg', 'resume=@resume.docx;type=application/msword']
+          This example shows how to upload multiple files with different field names and specifying
+          MIME type for one of the files.
+
+    Returns:
+        list of tuple: A list where each tuple represents a file to be uploaded. Each tuple is
+                       (fieldname, filetuple), where 'filetuple' is either (filepath, fileobject)
+                       or (filepath, (fileobject, mimetype)) if a MIME type is specified.
+    """
+    files = []
+    for file_arg in form_data:
+        # Splitting the argument into its components: field name, file path, and optional MIME type
+        parts = file_arg.split(';')
+        field_name, file_path = parts[0].split('=', 1)
+        file_path = file_path[1:]  # Remove the '@' at the beginning
+        mime_type = None
+
+        # Look for an optional MIME type specification
+        for part in parts[1:]:
+            if part.startswith('type='):
+                mime_type = part[5:]
+        
+        # Adding the file to the list, including the MIME type if specified
+        file_tuple = (file_path, (open(file_path, 'rb'), mime_type)) if mime_type else (file_path, open(file_path, 'rb'))
+        files.append((field_name, file_tuple))
+    return files
+
 
 def inner_main(argv):
     """
@@ -459,6 +508,7 @@ def inner_main(argv):
     parser.add_argument('--data-binary', action='store_true',
                         help='Process HTTP POST data exactly as specified with '
                              'no extra processing whatsoever.', default=False)
+    parser.add_argument('-F', '--form', action='append', help='Specify multipart MIME data.')
 
     parser.add_argument('--region', help='AWS region', default='us-east-1',
                         env_var='AWS_DEFAULT_REGION')
@@ -491,6 +541,8 @@ def inner_main(argv):
         read_mode = "rb" if args.data_binary else "r"
         with open(filename, read_mode) as post_data_file:
             data = post_data_file.read()
+
+    files = __process_form_data(args.form)
 
     if args.header is None:
         args.header = default_headers
@@ -527,7 +579,8 @@ def inner_main(argv):
                             args.session_token,
                             args.data_binary,
                             verify=not args.insecure,
-                            allow_redirects=args.location)
+                            allow_redirects=args.location,
+                            files=files)
 
     if args.include:
         print(response.headers, end='\n\n')
