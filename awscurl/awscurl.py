@@ -12,7 +12,7 @@ import pprint
 import sys
 import re
 
-from typing import IO, List, Tuple, Union
+from typing import IO, List, Optional, Tuple, Union
 import urllib
 from urllib.parse import quote
 
@@ -434,7 +434,7 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
     return access_key, secret_key, security_token
 
 
-def __process_form_data(form_data: List[str]) -> List[Tuple[str, Union[str, Tuple[str, Union[IO, Tuple[IO, str]]]]]]:
+def __process_form_data(form_data: List[str]) -> Optional[List[Tuple[str, Union[str, Tuple[str, Union[IO, Tuple[IO, str]]]]]]]:
     """
     Process form data to prepare files for uploading with optional MIME types,
     supporting specific form field names for each file.
@@ -462,6 +462,9 @@ def __process_form_data(form_data: List[str]) -> List[Tuple[str, Union[str, Tupl
                        (fieldname, filetuple), where 'filetuple' is either (filepath, fileobject)
                        or (filepath, (fileobject, mimetype)) if a MIME type is specified.
     """
+    if form_data is None:
+        return None
+
     files = []
     for file_arg in form_data:
         # Splitting the argument into its components: field name, file path, and optional MIME type
