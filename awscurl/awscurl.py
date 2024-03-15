@@ -12,7 +12,7 @@ import pprint
 import sys
 import re
 
-from typing import IO, List, Optional, Tuple, Union
+from typing import IO, Dict, List, Optional, Tuple, Union
 import urllib
 from urllib.parse import quote
 
@@ -434,53 +434,55 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
     return access_key, secret_key, security_token
 
 
-def __process_form_data(form_data: List[str]) -> Optional[List[Tuple[str, Union[str, Tuple[str, Union[IO, Tuple[IO, str]]]]]]]:
+def process_form_data(form_data: List[str]) -> Dict[str, Union[Tuple[str, IO[bytes]], Tuple[str, IO[bytes], str], Tuple[str, IO[bytes], str, Dict[str, str]]]]:
     """
-    Process form data to prepare files for uploading with optional MIME types,
-    supporting specific form field names for each file.
+    Process form data to prepare files for uploading, supporting specific form field names for each file
+    and accommodating the `requests` library files parameter format. This function is intended for internal
+    use within this module.
 
     Args:
-        form_data (list of str): Each string in the list should be formatted as
-                                 'fieldname=@filepath[;type=mimetype]'.
+        form_data: Each string in the list should be formatted as 'fieldname=@filepath[;type=mimetype]'.
 
     Examples:
-        - Simple file upload with field name:
-          'profile=@portrait.jpg'
-          This will upload a file located at 'portrait.jpg' with the field name 'profile'.
+        - Simple file upload with field name: 'profile=@portrait.jpg'
+          This will upload a file located at 'portrait.jpg' under the field name 'profile'.
 
-        - File upload with field name and MIME type:
-          'document=@report.pdf;type=application/pdf'
+        - File upload with field name and MIME type: 'document=@report.pdf;type=application/pdf'
           This uploads 'report.pdf' as 'document', with an explicit MIME type 'application/pdf'.
 
-        - Multiple file uploads:
-          ['photo=@vacation.jpg', 'resume=@resume.docx;type=application/msword']
+        - Multiple file uploads: ['photo=@vacation.jpg', 'resume=@resume.docx;type=application/msword']
           This example shows how to upload multiple files with different field names and specifying
           MIME type for one of the files.
 
     Returns:
-        list of tuple: A list where each tuple represents a file to be uploaded. Each tuple is
-                       (fieldname, filetuple), where 'filetuple' is either (filepath, fileobject)
-                       or (filepath, (fileobject, mimetype)) if a MIME type is specified.
+        A dictionary where keys are the form field names and the values are file-tuples compatible
+        with the `requests` library. The file-tuple can be a 2-tuple ('filename', fileobj),
+        3-tuple ('filename', fileobj, 'content_type'), or a 4-tuple
+        ('filename', fileobj, 'content_type', custom_headers) if additional headers are needed.
     """
-    if form_data is None:
-        return None
+    files: Dict[str, Union[Tuple[str, IO[bytes]], Tuple[str, IO[bytes], str], Tuple[str, IO[bytes], str, Dict[str, str]]]] = {}
 
-    files = []
+    if form_data is None:
+        return files
+
     for file_arg in form_data:
-        # Splitting the argument into its components: field name, file path, and optional MIME type
         parts = file_arg.split(';')
         field_name, file_path = parts[0].split('=', 1)
         file_path = file_path[1:]  # Remove the '@' at the beginning
         mime_type = None
 
-        # Look for an optional MIME type specification
-        for part in parts[1:]:
+        for part in parts:
             if part.startswith('type='):
-                mime_type = part[5:]
+                mime_type = part.split('=', 1)[1]
+                break  # Assuming only one MIME type specification, break after finding
 
-        # Adding the file to the list, including the MIME type if specified
-        file_tuple = (file_path, (open(file_path, 'rb'), mime_type)) if mime_type else (file_path, open(file_path, 'rb'))
-        files.append((field_name, file_tuple))
+        file_obj: IO[bytes] = open(file_path, 'rb')
+        file_tuple: Union[Tuple[str, IO[bytes]], Tuple[str, IO[bytes], str]] = (file_path.split('/')[-1], file_obj)
+        if mime_type:
+            file_tuple = (file_path.split('/')[-1], file_obj, mime_type)
+
+        files[field_name] = file_tuple
+
     return files
 
 
@@ -546,7 +548,7 @@ def inner_main(argv):
         with open(filename, read_mode) as post_data_file:
             data = post_data_file.read()
 
-    files = __process_form_data(args.form)
+    files = process_form_data(args.form)
 
     if args.header is None:
         args.header = default_headers
