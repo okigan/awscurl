@@ -551,7 +551,7 @@ def inner_main(argv):
     files = process_form_data(args.form)
 
     if args.header is None:
-        args.header = default_headers
+        args.header = default_headers if len(files) == 0 else []
 
     if args.security_token is not None:
         args.session_token = args.security_token
