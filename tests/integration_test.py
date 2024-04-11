@@ -125,3 +125,12 @@ class TestInnerMainMethod(TestCase):
             inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
             1
         )
+
+class TestInnerMainMethodEmptyCredentials(TestCase):
+    maxDiff = None
+
+    def test_exit_code(self, *args, **kwargs):
+        self.assertEqual(
+            inner_main(['--verbose', '--access_key', '', '--secret_key', '', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
+            1
+        )
