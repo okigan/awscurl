@@ -436,6 +436,10 @@ def normalize_args(args):
         args.access_key = None
     if args.secret_key == "":
         args.secret_key = None
+    if args.security_token == "":
+        args.security_token = None
+    if args.session_token == "":
+        args.session_token = None
 
 
 def inner_main(argv):

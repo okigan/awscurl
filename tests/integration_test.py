@@ -131,6 +131,7 @@ class TestInnerMainMethodEmptyCredentials(TestCase):
 
     def test_exit_code(self, *args, **kwargs):
         self.assertEqual(
-            inner_main(['--verbose', '--access_key', '', '--secret_key', '', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
+            inner_main(['--verbose', '--access_key', '', '--secret_key', '', '--session_token', '', '--service', 's3',
+                        'https://awscurl-sample-bucket.s3.amazonaws.com']),
             1
         )
