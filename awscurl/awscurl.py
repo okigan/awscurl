@@ -213,6 +213,13 @@ def task_1_create_a_canonical_request(
     if security_token:
         signed_headers += ';x-amz-security-token'
 
+    # Step 5.5: Add custom signed headers into the canonical_headers and signed_headers lists.
+    # Header names must be lowercase, values trimmed, and sorted in ASCII order.
+    for header,value in sorted(headers.items()):
+        if "x-amz-" in header.lower():
+            canonical_headers += (header.lower() + ':' + value.strip() + '\n')
+            signed_headers += (';' + header.lower().split(':')[0])
+
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
     payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
