@@ -215,7 +215,7 @@ def task_1_create_a_canonical_request(
 
     # Step 5.5: Add custom signed headers into the canonical_headers and signed_headers lists.
     # Header names must be lowercase, values trimmed, and sorted in ASCII order.
-    for header,value in sorted(headers.items()):
+    for header, value in sorted(headers.items()):
         if "x-amz-" in header.lower():
             canonical_headers += (header.lower() + ':' + value.strip() + '\n')
             signed_headers += (';' + header.lower().split(':')[0])
