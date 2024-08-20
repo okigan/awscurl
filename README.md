@@ -126,30 +126,28 @@ docker pull ghcr.io/okigan/awscurl
 ## Options
 
 ```sh
-usage: awscurl [-h] [-v] [-i] [-X REQUEST] [-d DATA] [-H HEADER]
-                  [--region REGION] [--service SERVICE]
-                  [--profile AWS_PROFILE]
-                  [--access_key ACCESS_KEY] [--secret_key SECRET_KEY]
-                  [--security_token SECURITY_TOKEN]
-                  uri
+usage: __main__.py [-h] [-v] [-i] [-X REQUEST] [-d DATA] [-H HEADER] [-k] [--data-binary] [--region REGION] [--profile PROFILE] [--service SERVICE]
+                   [--access_key ACCESS_KEY] [--secret_key SECRET_KEY] [--security_token SECURITY_TOKEN] [--session_token SESSION_TOKEN] [-L] [-o <file>]
+                   uri
 
-Curl AWS request signing If an arg is specified in more than one place, then
-command-line values override environment variables which override defaults.
+Curl AWS request signing
 
 positional arguments:
   uri
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -v, --verbose         verbose flag (default: False)
-  -i, --include         include headers in response (default: False)
+  -i, --include         include headers in the output (default: False)
   -X REQUEST, --request REQUEST
                         Specify request command to use (default: GET)
   -d DATA, --data DATA  HTTP POST data (default: )
   -H HEADER, --header HEADER
-                        HTTP POST data (default: None)
-  --region REGION       AWS region (default: us-east-1)
-  --profile PROFILE     [env var: AWS_PROFILE] (default: default)
+                        HTTP header (default: None)
+  -k, --insecure        Allow insecure server connections when using SSL (default: False)
+  --data-binary         Process HTTP POST data exactly as specified with no extra processing whatsoever. (default: False)
+  --region REGION       AWS region [env var: AWS_DEFAULT_REGION] (default: us-east-1)
+  --profile PROFILE     AWS profile [env var: AWS_PROFILE] (default: default)
   --service SERVICE     AWS service (default: execute-api)
   --access_key ACCESS_KEY
                         [env var: AWS_ACCESS_KEY_ID] (default: None)
@@ -157,6 +155,13 @@ optional arguments:
                         [env var: AWS_SECRET_ACCESS_KEY] (default: None)
   --security_token SECURITY_TOKEN
                         [env var: AWS_SECURITY_TOKEN] (default: None)
+  --session_token SESSION_TOKEN
+                        [env var: AWS_SESSION_TOKEN] (default: None)
+  -L, --location        Follow redirects (default: False)
+  -o <file>, --output <file>
+                        Write to file instead of stdout (default: )
+
+ In general, command-line values override environment variables which override defaults.
 
 ```
 
