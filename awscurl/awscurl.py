@@ -12,6 +12,7 @@ import pprint
 import sys
 import re
 
+from typing import Dict
 import urllib
 from urllib.parse import quote
 
@@ -156,7 +157,7 @@ def remove_default_port(parsed_url):
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
-        headers,
+        headers: Dict,
         port,
         host,
         amzdate,
@@ -187,6 +188,7 @@ def task_1_create_a_canonical_request(
 
     # If the host was specified in the HTTP header, ensure that the canonical
     # headers are set accordingly
+    headers = requests.structures.CaseInsensitiveDict(headers)
     if 'host' in headers:
         fullhost = headers['host']
     else:
