@@ -3,6 +3,8 @@
 Test cases for seprate header calculation stages.
 """
 
+import json
+
 from unittest import TestCase
 
 from awscurl.awscurl import (
@@ -25,7 +27,7 @@ class TestStages(TestCase):
         """
         canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
             query="Action=DescribeInstances&Version=2013-10-15",
-            headers="{'Content-Type': 'application/json', 'Accept': 'application/xml'}",
+            headers=json.loads('{"Content-Type": "application/json", "Accept": "application/xml"}'),
             port=None,
             host="ec2.amazonaws.com",
             amzdate="20190921T022008Z",
@@ -52,7 +54,7 @@ class TestStages(TestCase):
         """
         canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
             query="arg1=true&arg3=c,b,a&arg2=false&noEncoding=ABC-abc_1.23~tilde/slash",
-            headers="{'Content-Type': 'application/json', 'Accept': 'application/xml'}",
+            headers=json.loads('{"Content-Type": "application/json", "Accept": "application/xml"}'),
             port=None,
             host="my-gateway-id.execute-api.us-east-1.amazonaws.com",
             amzdate="20190921T022008Z",
