@@ -11,6 +11,8 @@ jobs:
         exclude:
           - runs-on: ubuntu-latest
             python-version: '3.6'
+          - runs-on: macOS-latest
+            python-version: '3.6'
       fail-fast: false
 
     runs-on: ${{ matrix.runs-on }}
