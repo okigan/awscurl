@@ -12,6 +12,7 @@ import pprint
 import sys
 import re
 
+from typing import Dict
 import urllib
 from urllib.parse import quote
 
@@ -156,7 +157,7 @@ def remove_default_port(parsed_url):
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
-        headers,
+        headers: Dict,
         port,
         host,
         amzdate,
@@ -187,6 +188,7 @@ def task_1_create_a_canonical_request(
 
     # If the host was specified in the HTTP header, ensure that the canonical
     # headers are set accordingly
+    headers = requests.structures.CaseInsensitiveDict(headers)
     if 'host' in headers:
         fullhost = headers['host']
     else:
@@ -438,6 +440,17 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
     return access_key, secret_key, security_token
 
 
+def normalize_args(args):
+    if args.access_key == "":
+        args.access_key = None
+    if args.secret_key == "":
+        args.secret_key = None
+    if args.security_token == "":
+        args.security_token = None
+    if args.session_token == "":
+        args.session_token = None
+
+
 def inner_main(argv):
     """
     Awscurl CLI main entry point
@@ -484,6 +497,7 @@ def inner_main(argv):
     parser.add_argument('uri')
 
     args = parser.parse_args(argv)
+    normalize_args(args)
     # pylint: disable=global-statement
     global IS_VERBOSE
     IS_VERBOSE = args.verbose
