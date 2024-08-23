@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import datetime
+import json
 import sys
 
 from unittest import TestCase
@@ -97,6 +98,57 @@ class TestMakeRequest(TestCase):
                     'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date, Signature=de2b9ea384c10b03314afa10532adac358f8c93e3f3dd5bd724eda24a367a7ef',
                     'x-amz-content-sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                     'x-amz-security-token': ''}
+
+        self.assertEqual(expected, headers)
+
+        pass
+
+    @patch('requests.get', new_callable=my_mock_get)
+    @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
+    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
+    def test_make_request2(self, *args, **kvargs):
+
+        payload = json.dumps({
+            "key": "<redacted0>",
+            })
+        creds = {
+            "access_key": "<redacted1>",
+            "secret_key": "<redacted2>",
+            "token": "<redacted3>"
+        }
+
+        headers = {
+                "Content-Type": "application/json; charset:UTF-8",
+                "Connection": "keep-alive",
+                "Content-Encoding": "amz-1.0",
+                "x-amz-requestsupertrace": "true"
+            }
+        
+        params = {
+            'method':'POST',
+            'service':'service-<redacted>',
+            'region':"region-<redacted>",
+            'uri':"<redacted>",
+            'headers': headers,
+            'data':payload,
+            'data_binary':False,
+            'access_key':creds['access_key'],
+            'secret_key':creds['secret_key'],
+            'security_token':creds['token'],
+        }
+        
+        make_request(**params)
+
+        expected = {
+            "Content-Type": "application/json; charset:UTF-8",
+            "Connection": "keep-alive",
+            "Content-Encoding": "amz-1.0",
+            "x-amz-requestsupertrace": "true",
+            "Authorization": "AWS4-HMAC-SHA256 Credential=<redacted1>/19700101/region-<redacted>/service-<redacted>/aws4_request, SignedHeaders=host;x-amz-date;x-amz-requestsupertrace;x-amz-security-token, Signature=77e0f17c91f179231fcdf42f4387539b935117600de340ab1904f66302c181d7",
+            "x-amz-date": "19700101T000000Z",
+            "x-amz-content-sha256": "4930e13bdc55bb30accf137260ec8fa65b35658360e92a5f8498def3f8ab6144",
+            "x-amz-security-token": "<redacted3>"
+            }
 
         self.assertEqual(expected, headers)
 
