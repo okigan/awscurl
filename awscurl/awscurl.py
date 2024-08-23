@@ -210,17 +210,13 @@ def task_1_create_a_canonical_request(
     # Note: The request can include any headers; canonical_headers and
     # signed_headers lists those that you want to be included in the
     # hash of the request. "Host" and "x-amz-date" are always required.
-    signed_headers_list = ['host', 'x-amz-date']
-
-    if security_token:
-        signed_headers_list += ['x-amz-security-token']
+    # already tracked in canonical_headers_dict
 
     # Step 5.5: Add custom signed headers into the canonical_headers and signed_headers lists.
     # Header names must be lowercase, values trimmed, and sorted in ASCII order.
     for header, value in sorted(headers.items()):
         if "x-amz-" in header.lower():
             canonical_headers_dict[header.lower()] = value.strip()
-            signed_headers_list += [header.lower()]
 
     sorted_canonical_headers_items = sorted(canonical_headers_dict.items())
     canonical_headers = ''.join(['%s:%s\n' % (k, v) for k, v in sorted_canonical_headers_items])
