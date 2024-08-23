@@ -199,28 +199,32 @@ def task_1_create_a_canonical_request(
     # Step 4: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
-    canonical_headers = ('host:' + fullhost.lower() + '\n' +
-                         'x-amz-date:' + amzdate + '\n')
+    canonical_headers_dict = {'host': fullhost.lower(), 
+                              'x-amz-date': amzdate}
 
     if security_token:
-        canonical_headers += ('x-amz-security-token:' + security_token + '\n')
+        canonical_headers_dict['x-amz-security-token'] = security_token
 
     # Step 5: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
     # Note: The request can include any headers; canonical_headers and
     # signed_headers lists those that you want to be included in the
     # hash of the request. "Host" and "x-amz-date" are always required.
-    signed_headers = 'host;x-amz-date'
+    signed_headers_list = ['host', 'x-amz-date']
 
     if security_token:
-        signed_headers += ';x-amz-security-token'
+        signed_headers_list += ['x-amz-security-token']
 
     # Step 5.5: Add custom signed headers into the canonical_headers and signed_headers lists.
     # Header names must be lowercase, values trimmed, and sorted in ASCII order.
     for header, value in sorted(headers.items()):
         if "x-amz-" in header.lower():
-            canonical_headers += (header.lower() + ':' + value.strip() + '\n')
-            signed_headers += (';' + header.lower().split(':')[0])
+            canonical_headers_dict[header.lower()] = value.strip()
+            signed_headers_list += [header.lower()]
+
+    sorted_canonical_headers_items = sorted(canonical_headers_dict.items())
+    canonical_headers = ''.join(['%s:%s\n' % (k, v) for k, v in sorted_canonical_headers_items])
+    signed_headers = ';'.join(k for k, v in sorted_canonical_headers_items)
 
     # Step 6: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
