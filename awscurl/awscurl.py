@@ -570,7 +570,7 @@ def inner_main(argv):
 
 
 def main():
-    inner_main(sys.argv[1:])
+    return inner_main(sys.argv[1:])
 
 
 if __name__ == '__main__':
