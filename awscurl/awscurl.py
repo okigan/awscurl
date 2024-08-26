@@ -560,9 +560,12 @@ def inner_main(argv):
 
     if args.output:
         filename = args.output
-        file_mode = "wb" if args.data_binary else "w"
-        with open(filename, file_mode) as f:
-            f.write(response.content)
+        if args.data_binary:
+            with open(filename, "wb") as f:
+                f.write(response.content)
+        else:
+            with open(filename, "w") as f:
+                f.write(response.text)
 
     exit_code = 0 if response.ok else 1
 
