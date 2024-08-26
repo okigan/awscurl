@@ -126,7 +126,7 @@ docker pull ghcr.io/okigan/awscurl
 ## Options
 
 ```sh
-usage: __main__.py [-h] [-v] [-i] [-X REQUEST] [-d DATA] [-H HEADER] [-k] [--data-binary] [--region REGION] [--profile PROFILE] [--service SERVICE]
+usage: __main__.py [-h] [-v] [-i] [-X REQUEST] [-d DATA] [-H HEADER] [-k] [--fail-with-body] [--data-binary] [--region REGION] [--profile PROFILE] [--service SERVICE]
                    [--access_key ACCESS_KEY] [--secret_key SECRET_KEY] [--security_token SECURITY_TOKEN] [--session_token SESSION_TOKEN] [-L] [-o <file>]
                    uri
 
@@ -145,6 +145,7 @@ options:
   -H HEADER, --header HEADER
                         HTTP header (default: None)
   -k, --insecure        Allow insecure server connections when using SSL (default: False)
+  --fail-with-body      Fail on HTTP errors but save the body (default: False)
   --data-binary         Process HTTP POST data exactly as specified with no extra processing whatsoever. (default: False)
   --region REGION       AWS region [env var: AWS_DEFAULT_REGION] (default: us-east-1)
   --profile PROFILE     AWS profile [env var: AWS_PROFILE] (default: default)
