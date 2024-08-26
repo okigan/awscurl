@@ -475,6 +475,7 @@ def inner_main(argv):
     parser.add_argument('-H', '--header', help='HTTP header', action='append')
     parser.add_argument('-k', '--insecure', action='store_true', default=False,
                         help='Allow insecure server connections when using SSL')
+    parser.add_argument('--fail-with-body', action='store_true', help='Fail on HTTP errors but save the body', default=False)
 
     parser.add_argument('--data-binary', action='store_true',
                         help='Process HTTP POST data exactly as specified with '
@@ -564,7 +565,7 @@ def inner_main(argv):
         with open(filename, file_mode) as f:
             f.write(response.content)
 
-    exit_code = 0 if response.ok else 1
+    exit_code = 0 if response.ok or not args.fail_with_body else 22
 
     return exit_code
 
