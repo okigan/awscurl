@@ -433,7 +433,10 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
 
         if botocore:
             import botocore.session
-            session = botocore.session.get_session()
+            if profile:
+                session = botocore.session.Session(profile=profile)
+            else:
+                session = botocore.session.get_session()
             cred = session.get_credentials()
             access_key, secret_key, security_token = cred.access_key, cred.secret_key, cred.token
 
@@ -483,7 +486,7 @@ def inner_main(argv):
 
     parser.add_argument('--region', help='AWS region', default='us-east-1',
                         env_var='AWS_DEFAULT_REGION')
-    parser.add_argument('--profile', help='AWS profile', default='default', env_var='AWS_PROFILE')
+    parser.add_argument('--profile', help='AWS profile', env_var='AWS_PROFILE')
     parser.add_argument('--service', help='AWS service', default='execute-api')
     parser.add_argument('--access_key', env_var='AWS_ACCESS_KEY_ID')
     parser.add_argument('--secret_key', env_var='AWS_SECRET_ACCESS_KEY')
