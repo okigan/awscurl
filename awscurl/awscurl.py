@@ -12,6 +12,8 @@ import pprint
 import sys
 import re
 
+from botocore import crt, awsrequest
+from botocore.credentials import Credentials
 from typing import Dict
 import urllib
 from urllib.parse import quote
@@ -104,39 +106,52 @@ def make_request(method,
     amzdate = current_time.strftime('%Y%m%dT%H%M%SZ')
     datestamp = current_time.strftime('%Y%m%d')  # Date w/o time, used in credential scope
 
-    canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
-        query,
-        headers,
-        port,
-        host,
-        amzdate,
-        method,
-        data,
-        security_token,
-        data_binary,
-        canonical_uri)
-    string_to_sign, algorithm, credential_scope = task_2_create_the_string_to_sign(
-        amzdate,
-        datestamp,
-        canonical_request,
-        service,
-        region)
-    signature = task_3_calculate_the_signature(
-        datestamp,
-        string_to_sign,
-        service,
-        region,
-        secret_key)
-    auth_headers = task_4_build_auth_headers_for_the_request(
-        amzdate,
-        payload_hash,
-        algorithm,
-        credential_scope,
-        signed_headers,
-        signature,
-        access_key,
-        security_token)
-    headers.update(auth_headers)
+    if region == "*":
+        # support sigv4a
+        auth_headers = get_sigv4a_headers(
+            service,
+            region,
+            method,
+            uri,
+            access_key,
+            secret_key,
+            security_token)
+        headers.update(auth_headers)
+    else:
+        canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
+            query,
+            headers,
+            port,
+            host,
+            amzdate,
+            method,
+            data,
+            security_token,
+            data_binary,
+            canonical_uri)
+
+        string_to_sign, algorithm, credential_scope = task_2_create_the_string_to_sign(
+            amzdate,
+            datestamp,
+            canonical_request,
+            service,
+            region)
+        signature = task_3_calculate_the_signature(
+            datestamp,
+            string_to_sign,
+            service,
+            region,
+            secret_key)
+        auth_headers = task_4_build_auth_headers_for_the_request(
+            amzdate,
+            payload_hash,
+            algorithm,
+            credential_scope,
+            signed_headers,
+            signature,
+            access_key,
+            security_token)
+        headers.update(auth_headers)
 
     if data_binary:
         return __send_request(uri, data, headers, method, verify, allow_redirects)
@@ -334,6 +349,13 @@ def task_4_build_auth_headers_for_the_request(
         headers['x-amz-security-token'] = security_token
     return headers
 
+
+def get_sigv4a_headers(service, region, method, url, access_key, secret_key, security_token):
+    sig_v4a = crt.auth.CrtS3SigV4AsymAuth(
+        Credentials(access_key, secret_key, security_token), service, region)
+    request = awsrequest.AWSRequest(method=method, url=url)
+    sig_v4a.add_auth(request)
+    return request.prepare().headers
 
 def __normalize_query_string(query):
     parameter_pairs = (list(map(str.strip, s.split("=")))
