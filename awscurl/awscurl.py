@@ -509,10 +509,13 @@ def inner_main(argv):
     data = args.data
 
     if data is not None and data.startswith("@"):
-        filename = data[1:]
-        read_mode = "rb" if args.data_binary else "r"
-        with open(filename, read_mode) as post_data_file:
-            data = post_data_file.read()
+        if data == "@-":
+            data = sys.stdin.read()
+        else:
+            filename = data[1:]
+            read_mode = "rb" if args.data_binary else "r"
+            with open(filename, read_mode) as post_data_file:
+                data = post_data_file.read()
 
     if args.header is None:
         args.header = default_headers
