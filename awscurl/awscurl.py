@@ -451,6 +451,25 @@ def normalize_args(args):
         args.session_token = None
 
 
+def parse_data(data, binary):
+    if data is None:
+        return
+
+    # if data is not a file identifier, return it
+    if not data.startswith("@"):
+        return data
+
+    # if data is the stdin `@-` identifier, read from stdin
+    if data == "@-":
+        return sys.stdin.read()
+
+    # otherwise read from the file
+    filename = data[1:]
+    read_mode = "rb" if binary else "r"
+    with open(filename, read_mode) as post_data_file:
+        return post_data_file.read()
+
+
 def inner_main(argv):
     """
     Awscurl CLI main entry point
@@ -506,16 +525,7 @@ def inner_main(argv):
     if args.verbose:
         __log(vars(args))
 
-    data = args.data
-
-    if data is not None and data.startswith("@"):
-        if data == "@-":
-            data = sys.stdin.read()
-        else:
-            filename = data[1:]
-            read_mode = "rb" if args.data_binary else "r"
-            with open(filename, read_mode) as post_data_file:
-                data = post_data_file.read()
+    data = parse_data(args.data, args.data_binary)
 
     if args.header is None:
         args.header = default_headers

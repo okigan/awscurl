@@ -9,12 +9,16 @@ from unittest import TestCase
 
 from mock import patch
 
-from awscurl.awscurl import aws_url_encode, make_request
+from awscurl.awscurl import aws_url_encode, make_request, parse_data
 
 from requests.exceptions import SSLError
 from requests import Response
 
+from io import StringIO
+
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
+
 __author__ = 'iokulist'
 
 
@@ -211,41 +215,6 @@ class TestMakeRequestVerifySSLPass(TestCase):
 
         pass
 
-
-class TestMakeRequestWithDataFromStdin(TestCase):
-    maxDiff = None
-    payload = json.dumps({
-    "key": "<redacted0>",
-    })
-
-
-    @patch('requests.get', new_callable=my_mock_get)
-    @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
-    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    @patch('builtins.input', side_effect=[payload])
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
-        params = {'method': 'GET',
-                  'service': 'ec2',
-                  'region': 'region',
-                  'uri': 'https://user:pass@host:123/path/?a=b&c=d',
-                  'headers': headers,
-                  'data': '@-',
-                  'access_key': '',
-                  'secret_key': '',
-                  'security_token': '',
-                  'data_binary': True}
-        make_request(**params)
-
-        expected = {'x-amz-date': '19700101T000000Z',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date, Signature=6ebcf316c9bb50bb7b2bbabf128dddde3babbf16badfd31ddc40838e7592d5df',
-                    'x-amz-content-sha256': '3f514228bd64bbff67daaa80e482aee0e0b0c51891d3a64e4abfa145f4364b99',
-                    'x-amz-security-token': ''}
-
-        self.assertEqual(expected, headers)
-
-        pass
-
 class TestMakeRequestWithBinaryData(TestCase):
     maxDiff = None
 
@@ -419,3 +388,33 @@ class TestAwsUrlEncode(TestCase):
         self.assertEqual(aws_url_encode("\u0394-\u30a1"), "%CE%94-%E3%82%A1")
 
     pass
+
+
+@pytest.fixture(scope="class")
+def monkeypatch_for_class(request):
+    request.cls.monkeypatch = MonkeyPatch()
+
+@pytest.mark.usefixtures("monkeypatch_for_class")
+class TestMakeRequestWithDataFromStdin(TestCase):
+    def setUp(self):
+        pass
+
+    def test_input_data(self):
+        expected = '{"hello": "world"}'
+        data = parse_data(expected, False)
+        self.assertEqual(expected, data)
+        pass
+
+    def test_input_stdin(self):
+        expected = json.dumps({
+            "my": "arbitrary-json-data",
+            "another": {
+                "random": "json-object"
+            },
+            "and": ["a", "list", "too"]
+        })
+        self.monkeypatch.setattr('sys.stdin', StringIO(expected))
+        data = parse_data("@-", False)
+        self.assertEqual(expected, data)
+        pass
+
