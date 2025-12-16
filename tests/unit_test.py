@@ -9,12 +9,16 @@ from unittest import TestCase
 
 from mock import patch
 
-from awscurl.awscurl import aws_url_encode, make_request
+from awscurl.awscurl import aws_url_encode, make_request, parse_data
 
 from requests.exceptions import SSLError
 from requests import Response
 
+from io import StringIO
+
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
+
 __author__ = 'iokulist'
 
 
@@ -211,7 +215,6 @@ class TestMakeRequestVerifySSLPass(TestCase):
 
         pass
 
-
 class TestMakeRequestWithBinaryData(TestCase):
     maxDiff = None
 
@@ -385,3 +388,33 @@ class TestAwsUrlEncode(TestCase):
         self.assertEqual(aws_url_encode("\u0394-\u30a1"), "%CE%94-%E3%82%A1")
 
     pass
+
+
+@pytest.fixture(scope="class")
+def monkeypatch_for_class(request):
+    request.cls.monkeypatch = MonkeyPatch()
+
+@pytest.mark.usefixtures("monkeypatch_for_class")
+class TestMakeRequestWithDataFromStdin(TestCase):
+    def setUp(self):
+        pass
+
+    def test_input_data(self):
+        expected = '{"hello": "world"}'
+        data = parse_data(expected, False)
+        self.assertEqual(expected, data)
+        pass
+
+    def test_input_stdin(self):
+        expected = json.dumps({
+            "my": "arbitrary-json-data",
+            "another": {
+                "random": "json-object"
+            },
+            "and": ["a", "list", "too"]
+        })
+        self.monkeypatch.setattr('sys.stdin', StringIO(expected))
+        data = parse_data("@-", False)
+        self.assertEqual(expected, data)
+        pass
+
