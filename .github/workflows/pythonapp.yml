@@ -6,7 +6,7 @@ jobs:
   build:
     strategy:
       matrix:
-        runs-on: [ubuntu-20.04, ubuntu-latest, macOS-latest]
+        runs-on: [ubuntu-22.04, ubuntu-latest, macOS-latest]
         python-version: [ '3.6', '3.8', '3.9', '3.11']
         exclude:
           - runs-on: ubuntu-latest
