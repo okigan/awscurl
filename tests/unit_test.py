@@ -99,7 +99,7 @@ class TestMakeRequest(TestCase):
         make_request(**params)
 
         expected = {'x-amz-date': '19700101T000000Z',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date, Signature=de2b9ea384c10b03314afa10532adac358f8c93e3f3dd5bd724eda24a367a7ef',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=591b7ad3b09e1a58bfb44a2cce310a3474643d2feb56bae3fe707638e6001fd9',
                     'x-amz-content-sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                     'x-amz-security-token': ''}
 
@@ -148,7 +148,7 @@ class TestMakeRequest(TestCase):
             "Connection": "keep-alive",
             "Content-Encoding": "amz-1.0",
             "x-amz-requestsupertrace": "true",
-            "Authorization": "AWS4-HMAC-SHA256 Credential=<redacted1>/19700101/region-<redacted>/service-<redacted>/aws4_request, SignedHeaders=host;x-amz-date;x-amz-requestsupertrace;x-amz-security-token, Signature=77e0f17c91f179231fcdf42f4387539b935117600de340ab1904f66302c181d7",
+            "Authorization": "AWS4-HMAC-SHA256 Credential=<redacted1>/19700101/region-<redacted>/service-<redacted>/aws4_request, SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date;x-amz-requestsupertrace;x-amz-security-token, Signature=b7346445ac29a9e7ee32b37b12b40295fe715b023c32579fedaf8518c472560b",
             "x-amz-date": "19700101T000000Z",
             "x-amz-content-sha256": "4930e13bdc55bb30accf137260ec8fa65b35658360e92a5f8498def3f8ab6144",
             "x-amz-security-token": "<redacted3>"
@@ -207,7 +207,7 @@ class TestMakeRequestVerifySSLPass(TestCase):
         make_request(**params)
 
         expected = {'x-amz-date': '19700101T000000Z',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date, Signature=de2b9ea384c10b03314afa10532adac358f8c93e3f3dd5bd724eda24a367a7ef',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=591b7ad3b09e1a58bfb44a2cce310a3474643d2feb56bae3fe707638e6001fd9',
                     'x-amz-content-sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
                     'x-amz-security-token': ''}
 
@@ -236,7 +236,7 @@ class TestMakeRequestWithBinaryData(TestCase):
         make_request(**params)
 
         expected = {'x-amz-date': '19700101T000000Z',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date, Signature=6ebcf316c9bb50bb7b2bbabf128dddde3babbf16badfd31ddc40838e7592d5df',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature=acd1d93620304cf08a36002b2f83fdca1e61a1d76d9621d24a7fe65360c09d56',
                     'x-amz-content-sha256': '3f514228bd64bbff67daaa80e482aee0e0b0c51891d3a64e4abfa145f4364b99',
                     'x-amz-security-token': ''}
 
@@ -267,7 +267,7 @@ class TestMakeRequestWithToken(TestCase):
 
         expected = {'x-amz-date': '19700101T000000Z',
                     'x-amz-content-sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=e767448ca06e8f3a17548d4193ea29afa759b84f957a71d0a051815f5ebfedfa',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token, Signature=ea6289aa4b2d606a25398ae763129ae05f8767240215ab605d8f0c728b02a94b',
                     'x-amz-security-token': 'GHI'}
 
         self.assertEqual(expected, headers)
@@ -297,7 +297,7 @@ class TestMakeRequestWithTokenAndBinaryData(TestCase):
 
         expected = {'x-amz-date': '19700101T000000Z',
                     'x-amz-content-sha256': '3f514228bd64bbff67daaa80e482aee0e0b0c51891d3a64e4abfa145f4364b99',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=edcee42e10d5a4cec5414ebe938edcf292a9a33261809523e2df16281d452c5f',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token, Signature=67ef2ee6583f88829575af9dec721aab9255e0a87a53fb439df86ee763ebbfd3',
                     'x-amz-security-token': 'GHI'}
 
         self.assertEqual(expected, headers)
@@ -328,7 +328,7 @@ class TestHostFromHeaderUsedInCanonicalHeader(TestCase):
         expected = {'host': 'some.other.host.address.com',
                     'x-amz-date': '19700101T000000Z',
                     'x-amz-content-sha256': 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
-                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-date;x-amz-security-token, Signature=9cba1c499417655c170f5018b577b9f89154cf9b9827273df54bfa182e5f4273',
+                    'Authorization': 'AWS4-HMAC-SHA256 Credential=ABC/19700101/region/ec2/aws4_request, SignedHeaders=host;x-amz-content-sha256;x-amz-date;x-amz-security-token, Signature=d470f8a8988b7de8ed1a9a9bf29b68706100fc8bdadd2db5fb9f602de4b49778',
                     'x-amz-security-token': 'GHI'}
 
         self.assertEqual(expected, headers)

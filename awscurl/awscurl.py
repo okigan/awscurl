@@ -196,37 +196,42 @@ def task_1_create_a_canonical_request(
 
     fullhost = remove_default_port(urllib.parse.urlparse('//' + fullhost))
 
-    # Step 4: Create the canonical headers and signed headers. Header names
+    # Step 4: Create payload hash (hash of the request body content). For GET
+    # requests, the payload is an empty string ("").
+    payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
+
+    # Step 5: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
     # Note that there is a trailing \n.
     canonical_headers_dict = {'host': fullhost.lower(), 
+                              'x-amz-content-sha256': payload_hash,
                               'x-amz-date': amzdate}
 
     if security_token:
         canonical_headers_dict['x-amz-security-token'] = security_token
 
-    # Step 5: Create the list of signed headers. This lists the headers
+    if 'content-type' in headers:
+        canonical_headers_dict['content-type'] = headers['content-type'].strip()
+
+    # Step 6: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
     # Note: The request can include any headers; canonical_headers and
     # signed_headers lists those that you want to be included in the
     # hash of the request. "Host" and "x-amz-date" are always required.
-    # already tracked in canonical_headers_dict
+    # "content-type" must be included if present in the request.
+    # Headers starting with "x-amz-" (e.g. x-amz-content-sha256) are also required.
 
-    # Step 5.5: Add custom signed headers into the canonical_headers and signed_headers lists.
+    # Step 6.5: Add custom signed headers into the canonical_headers and signed_headers lists.
     # Header names must be lowercase, values trimmed, and sorted in ASCII order.
     for header, value in sorted(headers.items()):
-        if "x-amz-" in header.lower():
+        if header.lower().startswith("x-amz-"):
             canonical_headers_dict[header.lower()] = value.strip()
 
     sorted_canonical_headers_items = sorted(canonical_headers_dict.items())
     canonical_headers = ''.join(['%s:%s\n' % (k, v) for k, v in sorted_canonical_headers_items])
     signed_headers = ';'.join(k for k, v in sorted_canonical_headers_items)
 
-    # Step 6: Create payload hash (hash of the request body content). For GET
-    # requests, the payload is an empty string ("").
-    payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
-
-    # Step 7: Combine elements to create create canonical request
+    # Step 7: Combine elements to create canonical request
     canonical_request = (method + '\n' +
                          requests.utils.quote(canonical_uri) + '\n' +
                          canonical_querystring + '\n' +
