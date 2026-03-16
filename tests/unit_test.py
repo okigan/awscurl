@@ -395,6 +395,11 @@ class TestAwsUrlEncode(TestCase):
         self.assertEqual(aws_url_encode("group%20by"), "group%20by")
         self.assertEqual(aws_url_encode("%7Bstatus%3D%222xx%22%7D"), "%7Bstatus%3D%222xx%22%7D")
 
+    def test_aws_url_encode_non_utf8(self):
+        """Non-UTF8 percent-encoded bytes like %FF must be preserved."""
+        self.assertEqual(aws_url_encode("%FF"), "%FF")
+        self.assertEqual(aws_url_encode("a%FFb"), "a%FFb")
+
     pass
 
 
