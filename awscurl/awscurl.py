@@ -17,7 +17,7 @@ from botocore import crt, awsrequest
 from botocore.credentials import Credentials
 from typing import Dict
 import urllib
-from urllib.parse import quote, unquote
+from urllib.parse import quote_from_bytes, unquote_to_bytes
 from urllib3.util.ssl_ import create_urllib3_context
 
 import configparser
@@ -398,7 +398,7 @@ def aws_url_encode(text):
       extended UTF-8 characters must be in the form %XY%ZA%BC.
     - Percent-encode all other characters including equals (=).
     """
-    return quote(unquote(text), safe='~')
+    return quote_from_bytes(unquote_to_bytes(text), safe='~')
 
 
 def __now():
