@@ -7,7 +7,10 @@ import sys
 
 from unittest import TestCase
 
-from mock import patch
+try:
+    from mock import patch
+except ImportError:
+    from unittest.mock import patch
 
 from awscurl.awscurl import aws_url_encode, make_request, parse_data
 
