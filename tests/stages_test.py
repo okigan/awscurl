@@ -39,14 +39,16 @@ class TestStages(TestCase):
         self.assertEqual(canonical_request, "GET\n"
                          "/\n"
                          "Action=DescribeInstances&Version=2013-10-15\n"
+                         "content-type:application/json\n"
                          "host:ec2.amazonaws.com\n"
+                         "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n"
                          "x-amz-date:20190921T022008Z\n"
                          "\n"
-                         "host;x-amz-date\n"
+                         "content-type;host;x-amz-content-sha256;x-amz-date\n"
                          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
         self.assertEqual(payload_hash,
                          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-        self.assertEqual(signed_headers, "host;x-amz-date")
+        self.assertEqual(signed_headers, "content-type;host;x-amz-content-sha256;x-amz-date")
 
     def test_task_1_create_a_canonical_request_url_encode_querystring(self):
         """
@@ -66,14 +68,34 @@ class TestStages(TestCase):
         self.assertEqual(canonical_request, "GET\n"
                          "/stage/my-path\n"
                          "arg1=true&arg2=false&arg3=c%2Cb%2Ca&noEncoding=ABC-abc_1.23~tilde%2Fslash\n"
+                         "content-type:application/json\n"
                          "host:my-gateway-id.execute-api.us-east-1.amazonaws.com\n"
+                         "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n"
                          "x-amz-date:20190921T022008Z\n"
                          "\n"
-                         "host;x-amz-date\n"
+                         "content-type;host;x-amz-content-sha256;x-amz-date\n"
                          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
         self.assertEqual(payload_hash,
                          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-        self.assertEqual(signed_headers, "host;x-amz-date")
+        self.assertEqual(signed_headers, "content-type;host;x-amz-content-sha256;x-amz-date")
+
+    def test_task_1_header_with_amz_substring_not_signed(self):
+        """
+        Test that headers containing 'x-amz-' as a substring (not prefix) are not
+        included in canonical/signed headers.
+        """
+        canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
+            query="",
+            headers={"Not-x-amz-fake": "should-not-be-signed"},
+            port=None,
+            host="example.amazonaws.com",
+            amzdate="20190921T022008Z",
+            method="GET",
+            data="",
+            security_token=None,
+            data_binary=False,
+            canonical_uri="/")
+        self.assertNotIn("not-x-amz-fake", signed_headers)
 
     def test_task_2_create_the_string_to_sign(self):
         """
