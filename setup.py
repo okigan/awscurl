@@ -31,7 +31,9 @@ setup(
         'configargparse',
         'configparser',
         'urllib3',
-        'botocore',
+        "boto3",
+        "botocore",
+        "awscrt"
     ],
     extras_require={
         'awslibs': []
