@@ -16,7 +16,7 @@ from botocore import crt, awsrequest
 from botocore.credentials import Credentials
 from typing import Dict
 import urllib
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 
 import configparser
 import configargparse
@@ -364,7 +364,7 @@ def get_sigv4a_headers(service, region, method, url, access_key, secret_key, sec
 
 
 def __normalize_query_string(query):
-    parameter_pairs = (list(map(str.strip, s.split("=")))
+    parameter_pairs = (list(map(str.strip, s.split("=", 1)))
                        for s in query.split('&')
                        if len(s) > 0)
 
@@ -381,9 +381,9 @@ def aws_url_encode(text):
     - Percent-encode all other characters with %XY, where X and Y are hexadecimal characters (0-9 and uppercase A-F).
       For example, the space character must be encoded as %20 (not using '+', as some encoding schemes do) and
       extended UTF-8 characters must be in the form %XY%ZA%BC.
-    - Double-encode any equals (=) characters in parameter values.
+    - Percent-encode all other characters including equals (=).
     """
-    return quote(text, safe='~=').replace('=', '==')
+    return quote(unquote(text), safe='~')
 
 
 def __now():
