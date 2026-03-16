@@ -362,6 +362,7 @@ def get_sigv4a_headers(service, region, method, url, access_key, secret_key, sec
     sig_v4a.add_auth(request)
     return request.prepare().headers
 
+
 def __normalize_query_string(query):
     parameter_pairs = (list(map(str.strip, s.split("=")))
                        for s in query.split('&')
