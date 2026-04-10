@@ -57,7 +57,7 @@ def my_mock_send_request_verify():
     class Object():
         pass
 
-    def ss(uri, data, headers, method, verify, allow_redirects, **kargs):
+    def ss(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max, **kargs):
         print("in mock")
         if not verify:
             raise SSLError
@@ -217,6 +217,63 @@ class TestMakeRequestVerifySSLPass(TestCase):
         self.assertEqual(expected, headers)
 
         pass
+
+
+class TestMakeRequestWithTLSVersions(TestCase):
+    maxDiff = None
+
+    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
+    def test_make_request(self, *args, **kvargs):
+        headers = {}
+        params = {'method': 'GET',
+                  'service': 'ec2',
+                  'region': 'region',
+                  'uri': 'https://user:pass@host:123/path/?a=b&c=d',
+                  'headers': headers,
+                  'data': '',
+                  'access_key': '',
+                  'secret_key': '',
+                  'security_token': '',
+                  'data_binary': False,
+                  'verify': True,
+                  'allow_redirects': False,
+                  'tls_min': '1.1',
+                  'tls_max': '1.3'}
+
+        with patch('awscurl.awscurl.__send_request') as mock_send:
+            make_request(**params)
+
+        mock_send.assert_called_once()
+        self.assertEqual('1.1', mock_send.call_args[0][6])
+        self.assertEqual('1.3', mock_send.call_args[0][7])
+
+
+class TestMakeRequestWithoutTLSVersions(TestCase):
+    maxDiff = None
+
+    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
+    def test_make_request(self, *args, **kvargs):
+        headers = {}
+        params = {'method': 'GET',
+                  'service': 'ec2',
+                  'region': 'region',
+                  'uri': 'https://user:pass@host:123/path/?a=b&c=d',
+                  'headers': headers,
+                  'data': '',
+                  'access_key': '',
+                  'secret_key': '',
+                  'security_token': '',
+                  'data_binary': False,
+                  'verify': True,
+                  'allow_redirects': False}
+
+        with patch('awscurl.awscurl.__send_request') as mock_send:
+            make_request(**params)
+
+        mock_send.assert_called_once()
+        self.assertIsNone(mock_send.call_args[0][6])
+        self.assertIsNone(mock_send.call_args[0][7])
+
 
 class TestMakeRequestWithBinaryData(TestCase):
     maxDiff = None
