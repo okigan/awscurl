@@ -39,6 +39,9 @@ jobs:
       - name: Check with pycodestyle
         run: |
           pycodestyle -v awscurl
+      - name: Check with mypy
+        run: |
+          mypy awscurl/ tests/
       - name: Test with pytest
         run: |
           python --version
