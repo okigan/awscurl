@@ -405,6 +405,31 @@ def __now():
     return datetime.datetime.utcnow()
 
 
+class _TLSAdapter(HTTPAdapter):
+    def __init__(self, tls_min=None, tls_max=None, verify=True, **kwargs):
+        self._tls_min = tls_min
+        self._tls_max = tls_max
+        self._verify = verify
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        ctx = create_urllib3_context()
+
+        tls_min_ver = TLS_VERSIONS.get(self._tls_min)
+        tls_max_ver = TLS_VERSIONS.get(self._tls_max)
+
+        if tls_min_ver is not None:
+            ctx.minimum_version = tls_min_ver
+        if tls_max_ver is not None:
+            ctx.maximum_version = tls_max_ver
+
+        if not self._verify:
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        kwargs['ssl_context'] = ctx
+        super().init_poolmanager(*args, **kwargs)
+
+
 def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
     __log(headers)
@@ -416,27 +441,15 @@ def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min,
         import urllib3
         urllib3.disable_warnings()
 
-    class TLSAdapter(HTTPAdapter):
-        def init_poolmanager(self, *args, **kwargs):
-            ctx = create_urllib3_context()
+    if tls_min is not None and tls_max is not None:
+        min_ver = TLS_VERSIONS[tls_min]
+        max_ver = TLS_VERSIONS[tls_max]
+        if min_ver > max_ver:
+            raise ValueError('--tls-min ({}) must not exceed --tls-max ({})'.format(tls_min, tls_max))
 
-            tls_min_ver = TLS_VERSIONS.get(tls_min)
-            tls_max_ver = TLS_VERSIONS.get(tls_max)
-
-            if tls_min_ver is not None:
-                ctx.minimum_version = tls_min_ver
-            if tls_max_ver is not None:
-                ctx.maximum_version = tls_max_ver
-
-            if not verify:
-                ctx.check_hostname = False
-                ctx.verify_mode = ssl.CERT_NONE
-            kwargs['ssl_context'] = ctx
-            super().init_poolmanager(*args, **kwargs)
-
-    session = requests.Session()
-    session.mount('https://', TLSAdapter())
-    response = session.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
+    with requests.Session() as session:
+        session.mount('https://', _TLSAdapter(tls_min=tls_min, tls_max=tls_max, verify=verify))
+        response = session.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % response.status_code)
@@ -576,8 +589,8 @@ def inner_main(argv):
     parser.add_argument('-L', '--location', action='store_true', default=False,
                         help="Follow redirects")
     parser.add_argument('-o', '--output', metavar="<file>", help='Write to file instead of stdout', default='')
-    parser.add_argument('--tls_min', help='Set minimum allowed TLS version', choices=TLS_VERSIONS.keys())
-    parser.add_argument('--tls_max', help='Set maximum allowed TLS version', choices=TLS_VERSIONS.keys())
+    parser.add_argument('--tls-min', help='Set minimum allowed TLS version', choices=TLS_VERSIONS.keys())
+    parser.add_argument('--tls-max', help='Set maximum allowed TLS version', choices=TLS_VERSIONS.keys())
 
     parser.add_argument('uri')
 

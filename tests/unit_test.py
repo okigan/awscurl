@@ -244,8 +244,9 @@ class TestMakeRequestWithTLSVersions(TestCase):
             make_request(**params)
 
         mock_send.assert_called_once()
-        self.assertEqual('1.1', mock_send.call_args[0][6])
-        self.assertEqual('1.3', mock_send.call_args[0][7])
+        _, kwargs = mock_send.call_args
+        self.assertEqual('1.1', kwargs.get('tls_min', mock_send.call_args[0][6]))
+        self.assertEqual('1.3', kwargs.get('tls_max', mock_send.call_args[0][7]))
 
 
 class TestMakeRequestWithoutTLSVersions(TestCase):
@@ -271,8 +272,9 @@ class TestMakeRequestWithoutTLSVersions(TestCase):
             make_request(**params)
 
         mock_send.assert_called_once()
-        self.assertIsNone(mock_send.call_args[0][6])
-        self.assertIsNone(mock_send.call_args[0][7])
+        _, kwargs = mock_send.call_args
+        self.assertIsNone(kwargs.get('tls_min', mock_send.call_args[0][6]))
+        self.assertIsNone(kwargs.get('tls_max', mock_send.call_args[0][7]))
 
 
 class TestMakeRequestWithBinaryData(TestCase):
