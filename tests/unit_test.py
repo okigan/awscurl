@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
+# mypy: disable-error-code="arg-type"
 
 import datetime
 import json
 import sys
+from types import SimpleNamespace
+from typing import Any
 
 from unittest import TestCase
 
 try:
-    from mock import patch
+    from mock import patch  # type: ignore[import-untyped]
 except ImportError:
     from unittest.mock import patch
 
@@ -25,58 +28,41 @@ from _pytest.monkeypatch import MonkeyPatch
 __author__ = 'iokulist'
 
 
-def my_mock_get():
-    class Object():
-        pass
-
-    def ss(*args, **kargs):
+def my_mock_get() -> Any:
+    def ss(*args: Any, **kargs: Any) -> SimpleNamespace:
         print("in mock")
-        response = Object()
-        response.status_code = 200
-        response.text = 'some text'
+        response = SimpleNamespace(status_code=200, text='some text')
         return response
 
     return ss
 
 
-def my_mock_send_request():
-    class Object():
-        pass
-
-    def ss(*args, **kargs):
+def my_mock_send_request() -> Any:
+    def ss(*args: Any, **kargs: Any) -> SimpleNamespace:
         print("in mock")
-        response = Object()
-        response.status_code = 200
-        response.text = 'some text'
+        response = SimpleNamespace(status_code=200, text='some text')
         return response
 
     return ss
 
 
-def my_mock_send_request_verify():
-    class Object():
-        pass
-
-    def ss(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max, **kargs):
+def my_mock_send_request_verify() -> Any:
+    def ss(uri: Any, data: Any, headers: Any, method: Any,
+           verify: Any, allow_redirects: Any,
+           tls_min: Any, tls_max: Any, **kargs: Any) -> SimpleNamespace:
         print("in mock")
         if not verify:
             raise SSLError
-        response = Object()
-        response.status_code = 200
-        response.text = 'some text'
-
+        response = SimpleNamespace(status_code=200, text='some text')
         return response
 
     return ss
 
 
-def my_mock_utcnow():
-    class Object():
-        pass
-
-    def ss(*args, **kargs):
+def my_mock_utcnow() -> Any:
+    def ss(*args: Any, **kargs: Any) -> datetime.datetime:
         print("in mock")
-        return datetime.datetime.utcfromtimestamp(0)
+        return datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
 
     return ss
 
@@ -87,8 +73,8 @@ class TestMakeRequest(TestCase):
     @patch('requests.get', new_callable=my_mock_get)
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -113,7 +99,7 @@ class TestMakeRequest(TestCase):
     @patch('requests.get', new_callable=my_mock_get)
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request2(self, *args, **kvargs):
+    def test_make_request2(self, *args: Any, **kvargs: Any):
 
         payload = json.dumps({
             "key": "<redacted0>",
@@ -125,25 +111,25 @@ class TestMakeRequest(TestCase):
         }
 
         headers = {
-                "Content-Type": "application/json; charset:UTF-8",
-                "Connection": "keep-alive",
-                "Content-Encoding": "amz-1.0",
-                "x-amz-requestsupertrace": "true"
-            }
-        
-        params = {
-            'method':'POST',
-            'service':'service-<redacted>',
-            'region':"region-<redacted>",
-            'uri':"<redacted>",
-            'headers': headers,
-            'data':payload,
-            'data_binary':False,
-            'access_key':creds['access_key'],
-            'secret_key':creds['secret_key'],
-            'security_token':creds['token'],
+            "Content-Type": "application/json; charset:UTF-8",
+            "Connection": "keep-alive",
+            "Content-Encoding": "amz-1.0",
+            "x-amz-requestsupertrace": "true"
         }
-        
+
+        params = {
+            'method': 'POST',
+            'service': 'service-<redacted>',
+            'region': "region-<redacted>",
+            'uri': "<redacted>",
+            'headers': headers,
+            'data': payload,
+            'data_binary': False,
+            'access_key': creds['access_key'],
+            'secret_key': creds['secret_key'],
+            'security_token': creds['token'],
+        }
+
         make_request(**params)
 
         expected = {
@@ -167,8 +153,8 @@ class TestMakeRequestVerifySSLRaises(TestCase):
 
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request_verify)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -193,8 +179,8 @@ class TestMakeRequestVerifySSLPass(TestCase):
 
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request_verify)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -223,8 +209,8 @@ class TestMakeRequestWithTLSVersions(TestCase):
     maxDiff = None
 
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -253,8 +239,8 @@ class TestMakeRequestWithoutTLSVersions(TestCase):
     maxDiff = None
 
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -283,8 +269,8 @@ class TestMakeRequestWithBinaryData(TestCase):
     @patch('requests.get', new_callable=my_mock_get)
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -313,8 +299,8 @@ class TestMakeRequestWithToken(TestCase):
     @patch('requests.get', new_callable=my_mock_get)
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -343,8 +329,8 @@ class TestMakeRequestWithTokenAndBinaryData(TestCase):
     @patch('requests.get', new_callable=my_mock_get)
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
-        headers = {}
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -373,7 +359,7 @@ class TestHostFromHeaderUsedInCanonicalHeader(TestCase):
     @patch('requests.get', new_callable=my_mock_get)
     @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
     @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
-    def test_make_request(self, *args, **kvargs):
+    def test_make_request(self, *args: Any, **kvargs: Any):
         headers = {'host': 'some.other.host.address.com'}
         params = {'method': 'GET',
                   'service': 'ec2',
@@ -402,14 +388,14 @@ class TestRequestResponse(TestCase):
     maxDiff = None
 
     @patch('awscurl.awscurl.__send_request')
-    def test_make_request(self, mocked_resp):
+    def test_make_request(self, mocked_resp: Any) -> None:
         resp = Response()
         resp.status_code=200
         resp._content = b'{"file_name": "test.yml", "env": "staging", "hash": "\xe5\xad\x97"}'
         resp.encoding = 'UTF-8'
         mocked_resp.return_value = resp
 
-        headers = {}
+        headers: dict[str, str] = {}
         params = {'method': 'GET',
                   'service': 'ec2',
                   'region': 'region',
@@ -466,8 +452,11 @@ class TestAwsUrlEncode(TestCase):
 def monkeypatch_for_class(request):
     request.cls.monkeypatch = MonkeyPatch()
 
+
 @pytest.mark.usefixtures("monkeypatch_for_class")
 class TestMakeRequestWithDataFromStdin(TestCase):
+    monkeypatch: MonkeyPatch
+
     def setUp(self):
         pass
 
@@ -489,4 +478,3 @@ class TestMakeRequestWithDataFromStdin(TestCase):
         data = parse_data("@-", False)
         self.assertEqual(expected, data)
         pass
-

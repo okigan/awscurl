@@ -1,6 +1,6 @@
 __author__ = 'iokulist'
 
-from setuptools import setup
+from setuptools import setup  # type: ignore[import-untyped]
 
 # https://github.com/okigan/awscurl/issues/167
 # with open("requirements.txt", "r", encoding="utf-8") as f:

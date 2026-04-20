@@ -4,6 +4,8 @@ Awscurl implementation
 """
 from __future__ import print_function
 
+from typing import Any, Dict, List, Optional, Tuple, Union
+
 import datetime
 import hashlib
 import hmac
@@ -21,10 +23,10 @@ from urllib.parse import quote_from_bytes, unquote_to_bytes
 from urllib3.util.ssl_ import create_urllib3_context
 
 import configparser
-import configargparse
-import requests
-from requests.adapters import HTTPAdapter
-from requests.structures import CaseInsensitiveDict
+import configargparse  # type: ignore[import-untyped]
+import requests  # type: ignore[import-untyped]
+from requests.adapters import HTTPAdapter  # type: ignore[import-untyped]
+from requests.structures import CaseInsensitiveDict  # type: ignore[import-untyped]
 
 
 from .utils import sha256_hash, sha256_hash_for_binary_data, sign
@@ -74,20 +76,20 @@ def url_path_to_dict(path):
 
 
 # pylint: disable=too-many-arguments,too-many-locals
-def make_request(method,
-                 service,
-                 region,
-                 uri,
-                 headers,
-                 data,
-                 access_key,
-                 secret_key,
-                 security_token,
-                 data_binary,
-                 verify=True,
-                 allow_redirects=False,
-                 tls_min=None,
-                 tls_max=None):
+def make_request(method: str,
+                 service: str,
+                 region: str,
+                 uri: str,
+                 headers: Dict[str, str],
+                 data: Union[str, bytes],
+                 access_key: str,
+                 secret_key: str,
+                 security_token: str,
+                 data_binary: bool,
+                 verify: bool = True,
+                 allow_redirects: bool = False,
+                 tls_min: Optional[str] = None,
+                 tls_max: Optional[str] = None) -> Any:
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -171,7 +173,8 @@ def make_request(method,
     if data_binary:
         return __send_request(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max)
     else:
-        return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects, tls_min, tls_max)
+        encoded_data = data.encode('utf-8') if isinstance(data, str) else data
+        return __send_request(uri, encoded_data, headers, method, verify, allow_redirects, tls_min, tls_max)
 
 
 def remove_default_port(parsed_url):
@@ -388,7 +391,7 @@ def __normalize_query_string(query):
     return normalized
 
 
-def aws_url_encode(text):
+def aws_url_encode(text: str) -> str:
     """
     URI-encode each parameter name and value according to the following rules:
     - Do not URI-encode any of the unreserved characters that RFC 3986 defines: A-Z, a-z, 0-9, hyphen (-),
@@ -527,9 +530,9 @@ def normalize_args(args):
         args.session_token = None
 
 
-def parse_data(data, binary):
+def parse_data(data: Optional[str], binary: bool) -> Optional[Union[str, bytes]]:
     if data is None:
-        return
+        return None
 
     # if data is not a file identifier, return it
     if not data.startswith("@"):
@@ -546,7 +549,7 @@ def parse_data(data, binary):
         return post_data_file.read()
 
 
-def inner_main(argv):
+def inner_main(argv: List[str]) -> int:
     """
     Awscurl CLI main entry point
     """
@@ -604,6 +607,8 @@ def inner_main(argv):
         __log(vars(args))
 
     data = parse_data(args.data, args.data_binary)
+    if data is None:
+        data = ''
 
     if args.header is None:
         args.header = default_headers
