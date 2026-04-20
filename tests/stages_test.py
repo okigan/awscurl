@@ -79,6 +79,32 @@ class TestStages(TestCase):
                          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
         self.assertEqual(signed_headers, "content-type;host;x-amz-content-sha256;x-amz-date")
 
+    def test_task_1_create_a_canonical_request_equals_in_value(self):
+        """
+        Test that query values containing '=' (e.g. base64 padding) and
+        pre-encoded characters are handled correctly without double-encoding.
+        """
+        canonical_request, payload_hash, signed_headers = task_1_create_a_canonical_request(
+            query="token=abc==&filter=%7Bstatus%3D%222xx%22%7D&plain=hello%20world",
+            headers={},
+            port=None,
+            host="example.amazonaws.com",
+            amzdate="20190921T022008Z",
+            method="GET",
+            data="",
+            security_token=None,
+            data_binary=False,
+            canonical_uri="/")
+        self.assertEqual(canonical_request, "GET\n"
+                         "/\n"
+                         "filter=%7Bstatus%3D%222xx%22%7D&plain=hello%20world&token=abc%3D%3D\n"
+                         "host:example.amazonaws.com\n"
+                         "x-amz-content-sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n"
+                         "x-amz-date:20190921T022008Z\n"
+                         "\n"
+                         "host;x-amz-content-sha256;x-amz-date\n"
+                         "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
+
     def test_task_1_header_with_amz_substring_not_signed(self):
         """
         Test that headers containing 'x-amz-' as a substring (not prefix) are not
