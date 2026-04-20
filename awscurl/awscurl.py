@@ -9,6 +9,7 @@ import hashlib
 import hmac
 import os
 import pprint
+import ssl
 import sys
 import re
 
@@ -17,10 +18,12 @@ from botocore.credentials import Credentials
 from typing import Dict
 import urllib
 from urllib.parse import quote
+from urllib3.util.ssl_ import create_urllib3_context
 
 import configparser
 import configargparse
 import requests
+from requests.adapters import HTTPAdapter
 from requests.structures import CaseInsensitiveDict
 
 
@@ -29,6 +32,14 @@ from .utils import sha256_hash, sha256_hash_for_binary_data, sign
 __author__ = 'iokulist'
 
 IS_VERBOSE = False
+
+
+TLS_VERSIONS = {
+    "1.0": ssl.TLSVersion.TLSv1,
+    "1.1": ssl.TLSVersion.TLSv1_1,
+    "1.2": ssl.TLSVersion.TLSv1_2,
+    "1.3": ssl.TLSVersion.TLSv1_3,
+}
 
 
 def __log(*args, **kwargs):
@@ -74,7 +85,9 @@ def make_request(method,
                  security_token,
                  data_binary,
                  verify=True,
-                 allow_redirects=False):
+                 allow_redirects=False,
+                 tls_min=None,
+                 tls_max=None):
     """
     # Make HTTP request with AWS Version 4 signing
 
@@ -91,6 +104,8 @@ def make_request(method,
     :param data_binary: bool
     :param verify: bool
     :param allow_redirects: false
+    :param tls_min: str
+    :param tls_max: str
 
     See also: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     """
@@ -154,9 +169,9 @@ def make_request(method,
         headers.update(auth_headers)
 
     if data_binary:
-        return __send_request(uri, data, headers, method, verify, allow_redirects)
+        return __send_request(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max)
     else:
-        return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects)
+        return __send_request(uri, data.encode('utf-8'), headers, method, verify, allow_redirects, tls_min, tls_max)
 
 
 def remove_default_port(parsed_url):
@@ -390,7 +405,32 @@ def __now():
     return datetime.datetime.utcnow()
 
 
-def __send_request(uri, data, headers, method, verify, allow_redirects):
+class _TLSAdapter(HTTPAdapter):
+    def __init__(self, tls_min=None, tls_max=None, verify=True, **kwargs):
+        self._tls_min = tls_min
+        self._tls_max = tls_max
+        self._verify = verify
+        super().__init__(**kwargs)
+
+    def init_poolmanager(self, *args, **kwargs):
+        ctx = create_urllib3_context()
+
+        tls_min_ver = TLS_VERSIONS.get(self._tls_min)
+        tls_max_ver = TLS_VERSIONS.get(self._tls_max)
+
+        if tls_min_ver is not None:
+            ctx.minimum_version = tls_min_ver
+        if tls_max_ver is not None:
+            ctx.maximum_version = tls_max_ver
+
+        if not self._verify:
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+        kwargs['ssl_context'] = ctx
+        super().init_poolmanager(*args, **kwargs)
+
+
+def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
     __log(headers)
 
@@ -401,7 +441,15 @@ def __send_request(uri, data, headers, method, verify, allow_redirects):
         import urllib3
         urllib3.disable_warnings()
 
-    response = requests.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
+    if tls_min is not None and tls_max is not None:
+        min_ver = TLS_VERSIONS[tls_min]
+        max_ver = TLS_VERSIONS[tls_max]
+        if min_ver > max_ver:
+            raise ValueError('--tls-min ({}) must not exceed --tls-max ({})'.format(tls_min, tls_max))
+
+    with requests.Session() as session:
+        session.mount('https://', _TLSAdapter(tls_min=tls_min, tls_max=tls_max, verify=verify))
+        response = session.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % response.status_code)
@@ -541,6 +589,8 @@ def inner_main(argv):
     parser.add_argument('-L', '--location', action='store_true', default=False,
                         help="Follow redirects")
     parser.add_argument('-o', '--output', metavar="<file>", help='Write to file instead of stdout', default='')
+    parser.add_argument('--tls-min', help='Set minimum allowed TLS version', choices=TLS_VERSIONS.keys())
+    parser.add_argument('--tls-max', help='Set maximum allowed TLS version', choices=TLS_VERSIONS.keys())
 
     parser.add_argument('uri')
 
@@ -590,7 +640,9 @@ def inner_main(argv):
                             args.session_token,
                             args.data_binary,
                             verify=not args.insecure,
-                            allow_redirects=args.location)
+                            allow_redirects=args.location,
+                            tls_min=args.tls_min,
+                            tls_max=args.tls_max)
 
     if args.include:
         print(response.headers, end='\n\n')
