@@ -5,6 +5,16 @@
 
 Unit tests verify SSL context configuration (no network needed).
 Integration tests verify real HTTPS connections work.
+
+Regression context (issue #235):
+  On Amazon Linux 2023 the RPM ``python3-requests`` replaces the
+  ``certifi`` import with a hard-coded path to the OS CA bundle
+  (``/etc/pki/tls/certs/ca-bundle.crt``).  ``certifi`` is **not
+  installed** — ``pip3 list`` never shows it, even after downgrading
+  awscurl.  Because ``_TLSAdapter.init_poolmanager`` creates a bare
+  ``ssl.SSLContext`` via ``create_urllib3_context()`` without loading
+  CA certificates, HTTPS requests fail with ``SSLCertVerificationError``
+  on any system where ``certifi`` is absent.
 """
 
 from typing import Any
