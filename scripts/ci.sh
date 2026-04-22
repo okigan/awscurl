@@ -20,7 +20,7 @@ do
         python3 -m venv "${VENV_DIR}"
         source "${VENV_DIR}"/bin/activate
 
-        echo which python="$(which python)"
+        echo which python="$(command -v python)"
         echo python --version="$(python --version)"
         echo pip --version="$(pip --version)"
         
