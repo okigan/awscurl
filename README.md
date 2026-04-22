@@ -3,7 +3,6 @@
 [![PyPI](https://img.shields.io/pypi/v/awscurl.svg)](https://pypi.python.org/pypi/awscurl)
 [![Build Status](https://github.com/okigan/awscurl/actions/workflows/pythonapp.yml/badge.svg)](https://github.com/okigan/awscurl)
 [![Docker Hub](https://img.shields.io/docker/pulls/okigan/awscurl.svg)](https://hub.docker.com/r/okigan/awscurl)
-![CI badge](https://github.com/okigan/awscurl/workflows/CI/badge.svg?branch=master)
 
 [![Edit with gitpod](https://img.shields.io/badge/edit--with-gitpod-blue.svg?style=flat-square)](https://gitpod.io/#https://github.com/okigan/awscurl)
 [![Edit with vscode](https://img.shields.io/badge/edit--with-vscode-blue.svg?style=flat-square)](https://vscode.dev/github/okigan/awscurl)
