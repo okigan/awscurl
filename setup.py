@@ -10,7 +10,7 @@ from setuptools import setup  # type: ignore[import-untyped]
 
 setup(
     name='awscurl',
-    version='0.40',
+    version='0.41',
     description='Curl like tool with AWS request signing',
     url='http://github.com/okigan/awscurl',
     author='Igor Okulist',
