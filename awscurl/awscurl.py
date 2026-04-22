@@ -417,6 +417,7 @@ class _TLSAdapter(HTTPAdapter):
 
     def init_poolmanager(self, *args, **kwargs):
         ctx = create_urllib3_context()
+        ctx.load_default_certs()
 
         tls_min_ver = TLS_VERSIONS.get(self._tls_min)
         tls_max_ver = TLS_VERSIONS.get(self._tls_max)
@@ -451,7 +452,8 @@ def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min,
             raise ValueError('--tls-min ({}) must not exceed --tls-max ({})'.format(tls_min, tls_max))
 
     with requests.Session() as session:
-        session.mount('https://', _TLSAdapter(tls_min=tls_min, tls_max=tls_max, verify=verify))
+        if tls_min is not None or tls_max is not None or not verify:
+            session.mount('https://', _TLSAdapter(tls_min=tls_min, tls_max=tls_max, verify=verify))
         response = session.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')

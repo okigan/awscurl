@@ -16,3 +16,4 @@ docker_run() {
 docker_run "ubuntu" "./scripts/ci.sh"
 docker_run "alpine" "./scripts/ci.sh"
 docker_run "centos" "./scripts/ci.sh"
+docker_run "amazonlinux" "./scripts/ci.sh"

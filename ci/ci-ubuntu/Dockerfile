@@ -11,8 +11,8 @@ RUN apt install -y curl git \
     autoconf \
     automake \
     libtool \
-    libffi-dev libreadline-dev libz-dev libsqlite-dev libssl-dev \
-    libreadline-dev libsqlite3-dev wget curl libncurses5-dev libncursesw5-dev \
+    libffi-dev libreadline-dev libz-dev libsqlite3-dev libssl-dev \
+    wget curl libncurses5-dev libncursesw5-dev \
     xz-utils tk-dev libffi-dev libbz2-dev liblzma-dev git
 
 RUN curl https://pyenv.run | bash
