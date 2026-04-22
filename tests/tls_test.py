@@ -33,36 +33,31 @@ class TestTLSAdapterSSLContext(TestCase):
     without certifi (e.g. Amazon Linux with distro-packaged requests)."""
 
     def test_ssl_context_has_ca_certs(self):
-        """The SSL context created by _TLSAdapter should have CA certs."""
+        """The SSL context created by _TLSAdapter should load default certs.
+
+        Note: we verify load_default_certs() is called rather than checking
+        get_ca_certs() count, because on capath-based systems (e.g. ubuntu-22.04)
+        certs aren't enumerable until an actual TLS connection uses them.
+        """
         adapter = _TLSAdapter(tls_min=None, tls_max=None, verify=True)
-        captured: dict[str, Any] = {}
 
-        def capture(self: Any, *args: Any, **kwargs: Any) -> None:
-            captured['ssl_context'] = kwargs.get('ssl_context')
+        with patch('awscurl.awscurl.create_urllib3_context') as mock_create:
+            mock_ctx = mock_create.return_value
+            with patch.object(HTTPAdapter, 'init_poolmanager'):
+                adapter.init_poolmanager(1, 1)
 
-        with patch.object(HTTPAdapter, 'init_poolmanager', capture):
-            adapter.init_poolmanager(1, 1)
-
-        ctx = captured.get('ssl_context')
-        self.assertIsNotNone(ctx, "ssl_context should be set")
-        self.assertGreater(len(ctx.get_ca_certs()), 0,
-                           "SSL context should have system CA certs loaded")
+            mock_ctx.load_default_certs.assert_called_once()
 
     def test_ssl_context_has_ca_certs_with_tls_versions(self):
         """CA certs should also be loaded when TLS versions are specified."""
         adapter = _TLSAdapter(tls_min='1.2', tls_max='1.3', verify=True)
-        captured: dict[str, Any] = {}
 
-        def capture(self: Any, *args: Any, **kwargs: Any) -> None:
-            captured['ssl_context'] = kwargs.get('ssl_context')
+        with patch('awscurl.awscurl.create_urllib3_context') as mock_create:
+            mock_ctx = mock_create.return_value
+            with patch.object(HTTPAdapter, 'init_poolmanager'):
+                adapter.init_poolmanager(1, 1)
 
-        with patch.object(HTTPAdapter, 'init_poolmanager', capture):
-            adapter.init_poolmanager(1, 1)
-
-        ctx = captured.get('ssl_context')
-        self.assertIsNotNone(ctx, "ssl_context should be set")
-        self.assertGreater(len(ctx.get_ca_certs()), 0,
-                           "SSL context should have system CA certs loaded")
+            mock_ctx.load_default_certs.assert_called_once()
 
 
 class TestHTTPSDefaultTLS(TestCase):
