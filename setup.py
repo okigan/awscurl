@@ -6,12 +6,17 @@ from setuptools import setup  # type: ignore[import-untyped]
 # with open("requirements.txt", "r", encoding="utf-8") as f:
 #     requirements = f.read().splitlines()
 
+with open("README.md", "r", encoding="utf-8") as f:
+    long_description = f.read()
+
 # https://blog.ganssle.io/articles/2021/10/setup-py-deprecated.html#summary
 
 setup(
     name='awscurl',
-    version='0.41',
+    version='0.42',
     description='Curl like tool with AWS request signing',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     url='http://github.com/okigan/awscurl',
     author='Igor Okulist',
     author_email='okigan@gmail.com',
