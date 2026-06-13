@@ -13,7 +13,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
     name='awscurl',
-    version='0.42',
+    version='0.43',
     description='Curl like tool with AWS request signing',
     long_description=long_description,
     long_description_content_type='text/markdown',
