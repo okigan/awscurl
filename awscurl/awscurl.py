@@ -221,7 +221,7 @@ def task_1_create_a_canonical_request(
 
     # If the host was specified in the HTTP header, ensure that the canonical
     # headers are set accordingly
-    headers = requests.structures.CaseInsensitiveDict(headers)
+    headers = requests.structures.CaseInsensitiveDict(headers)  # type: ignore[assignment]
     if 'host' in headers:
         fullhost = headers['host']
     else:
@@ -621,7 +621,7 @@ def inner_main(argv: List[str]) -> int:
 
     # pylint: disable=deprecated-lambda
     headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
-    headers = CaseInsensitiveDict(headers)
+    headers = CaseInsensitiveDict(headers)  # type: ignore[assignment]
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
     args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,

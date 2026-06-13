@@ -488,7 +488,7 @@ class TestBinaryResponseOutput(TestCase):
         resp.status_code = 200
         resp._content = binary_content
         resp.encoding = 'UTF-8'
-        resp.headers = {}
+        resp.headers = {}  # type: ignore[assignment]
         mocked_request.return_value = resp
 
         headers: dict[str, str] = {}
@@ -523,7 +523,7 @@ class TestBinaryResponseOutput(TestCase):
         resp.status_code = 200
         resp._content = gzip_content
         resp.encoding = 'UTF-8'
-        resp.headers = {}
+        resp.headers = {}  # type: ignore[assignment]
         mocked_request.return_value = resp
 
         headers: dict[str, str] = {}
