@@ -471,9 +471,9 @@ def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min,
 
             # Follow redirect WITHOUT signing (important for presigned URLs)
             # Strip only Authorization and AWS signing headers, keep user headers
-            redirect_headers = {k: v for k, v in headers.items()
-                              if k not in ('Authorization', 'x-amz-date',
-                                           'x-amz-content-sha256', 'x-amz-security-token')}
+            redirect_headers = {k: v for k, v in headers.items() if k not in
+                                ('Authorization', 'x-amz-date',
+                                 'x-amz-content-sha256', 'x-amz-security-token')}
 
             response = requests.request('GET', redirect_url, headers=redirect_headers,
                                         verify=verify, allow_redirects=True)
