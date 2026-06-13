@@ -657,16 +657,16 @@ def inner_main(argv: List[str]) -> int:
         pprint.PrettyPrinter(stream=sys.stderr).pprint(response.headers)
         pprint.PrettyPrinter(stream=sys.stderr).pprint('')
 
-    print(response.text)
+    # Write response body to stdout as raw bytes (matching curl behavior)
+    sys.stdout.buffer.write(response.content)
+    sys.stdout.buffer.flush()
 
     if args.output:
         filename = args.output
-        if args.data_binary:
-            with open(filename, "wb") as f:
-                f.write(response.content)
-        else:
-            with open(filename, "w") as f:
-                f.write(response.text)
+        # Always write raw bytes to file (matching curl behavior)
+        # --data-binary affects request body hashing, not response encoding
+        with open(filename, "wb") as f:
+            f.write(response.content)
 
     exit_code = 0 if response.ok or not args.fail_with_body else 22
 

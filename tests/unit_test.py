@@ -468,3 +468,83 @@ class TestMakeRequestWithDataFromStdin(TestCase):
         data = parse_data("@-", False)
         self.assertEqual(expected, data)
         pass
+
+
+class TestBinaryResponseOutput(TestCase):
+    """Test that binary response content is written as raw bytes, matching curl behavior.
+
+    See: https://github.com/okigan/awscurl/issues/242
+    """
+
+    @patch('awscurl.awscurl.__send_request')
+    @patch('builtins.open', side_effect=open)  # type: ignore[arg-type]
+    def test_binary_response_content_preserved_in_output(self, mocked_open, mocked_request) -> None:
+        """Binary response content (with non-UTF-8 bytes) should be written as raw bytes."""
+        # Simulate a gzip file: 0x1f 0x8b are gzip magic bytes
+        # 0x91 is NOT valid UTF-8 start byte
+        binary_content = b'\x1f\x8b\x08\x00\x00\x00\x00\x00\x91\xab\xcd\xef'
+
+        resp = Response()
+        resp.status_code = 200
+        resp._content = binary_content
+        resp.encoding = 'UTF-8'
+        resp.headers = {}
+        mocked_request.return_value = resp
+
+        headers: dict[str, str] = {}
+        params = {'method': 'GET',
+                  'service': 'execute-api',
+                  'region': 'us-east-1',
+                  'uri': 'https://api.execute-api.us-east-1.amazonaws.com/v1/file.gz',
+                  'headers': headers,
+                  'data': '',
+                  'access_key': 'AKIAIOSFODNN7EXAMPLE',
+                  'secret_key': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                  'security_token': '',
+                  'data_binary': False}
+
+        r = make_request(**params)
+
+        # response.content should be raw bytes - unchanged
+        self.assertEqual(r.content, binary_content)
+        # response.text decodes with replacement chars - not what we want for output
+        self.assertNotEqual(r.text.encode('utf-8'), binary_content)
+
+    @patch('awscurl.awscurl.__send_request')
+    def test_gzip_magic_bytes_preserved(self, mocked_request) -> None:
+        """gzip magic bytes (0x1f 0x8b) must be preserved exactly in raw output.
+
+        The core issue #242: non-UTF-8 byte 0x8b was being replaced with U+FFFD
+        (ef bf bd) when response.text was used, corrupting binary files.
+        """
+        gzip_content = b'\x1f\x8b\x08\x00\xff\xab\xcd\xef\x00'
+
+        resp = Response()
+        resp.status_code = 200
+        resp._content = gzip_content
+        resp.encoding = 'UTF-8'
+        resp.headers = {}
+        mocked_request.return_value = resp
+
+        headers: dict[str, str] = {}
+        params = {'method': 'GET',
+                  'service': 'execute-api',
+                  'region': 'us-east-1',
+                  'uri': 'https://api.execute-api.us-east-1.amazonaws.com/v1/data.gz',
+                  'headers': headers,
+                  'data': '',
+                  'access_key': 'AKIAIOSFODNN7EXAMPLE',
+                  'secret_key': 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+                  'security_token': '',
+                  'data_binary': False}
+
+        r = make_request(**params)
+
+        # The raw content must be byte-identical
+        self.assertEqual(r.content, gzip_content)
+        # Verify magic bytes at position 0,1 (0x1f 0x8b) - these are non-UTF-8 start bytes
+        self.assertEqual(r.content[0:2], b'\x1f\x8b')
+        # Byte 0xff at position 4 is invalid UTF-8 - must be preserved
+        self.assertEqual(r.content[4], 0xff)
+        # Byte 0xab at position 5 is invalid UTF-8 - must be preserved
+        self.assertEqual(r.content[5], 0xab)
