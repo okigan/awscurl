@@ -4,7 +4,7 @@ Awscurl implementation
 """
 from __future__ import print_function
 
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Tuple, Union
 
 import datetime
 import hashlib
@@ -80,7 +80,7 @@ def make_request(method: str,
                  service: str,
                  region: str,
                  uri: str,
-                 headers: Dict[str, str],
+                 headers: MutableMapping[str, str],
                  data: Union[str, bytes],
                  access_key: str,
                  secret_key: str,
@@ -190,7 +190,7 @@ def remove_default_port(parsed_url):
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
-        headers: Mapping[str, str],
+        headers: MutableMapping[str, str],
         port,
         host,
         amzdate,
@@ -231,7 +231,8 @@ def task_1_create_a_canonical_request(
 
     # Step 4: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
-    payload_hash = sha256_hash_for_binary_data(data) if data_binary else sha256_hash(data)
+    # Only use binary hash if data is present AND data_binary flag is set.
+    payload_hash = sha256_hash_for_binary_data(data) if (data_binary and data) else sha256_hash(data or '')
 
     # Step 5: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
@@ -451,13 +452,34 @@ def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min,
         if min_ver > max_ver:
             raise ValueError('--tls-min ({}) must not exceed --tls-max ({})'.format(tls_min, tls_max))
 
+    # Always disable automatic redirects for signed requests
+    # We'll handle redirects manually to avoid re-signing presigned URLs
     with requests.Session() as session:
         if tls_min is not None or tls_max is not None or not verify:
             session.mount('https://', _TLSAdapter(tls_min=tls_min, tls_max=tls_max, verify=verify))
-        response = session.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=allow_redirects)
+        response = session.request(method, uri, headers=headers, data=data, verify=verify, allow_redirects=False)
 
     __log('\nRESPONSE++++++++++++++++++++++++++++++++++++')
     __log('Response code: %d\n' % response.status_code)
+
+    # If user wants to follow redirects and we got a redirect response
+    if allow_redirects and response.status_code in (301, 302, 303, 307, 308):
+        redirect_url = response.headers.get('Location')
+        if redirect_url:
+            __log('\nFOLLOWING REDIRECT (unsigned)+++++++++++++++++++++++++++')
+            __log('Redirect URL = ' + redirect_url)
+
+            # Follow redirect WITHOUT signing (important for presigned URLs)
+            # Strip only Authorization and AWS signing headers, keep user headers
+            redirect_headers = {k: v for k, v in headers.items()
+                              if k not in ('Authorization', 'x-amz-date',
+                                           'x-amz-content-sha256', 'x-amz-security-token')}
+
+            response = requests.request('GET', redirect_url, headers=redirect_headers,
+                                        verify=verify, allow_redirects=True)
+
+            __log('\nREDIRECT RESPONSE++++++++++++++++++++++++++++++++++++')
+            __log('Response code: %d\n' % response.status_code)
 
     return response
 
