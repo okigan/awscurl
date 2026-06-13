@@ -4,7 +4,7 @@ Awscurl implementation
 """
 from __future__ import print_function
 
-from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
+from typing import Any, Dict, List, Mapping, MutableMapping, Optional, Tuple, Union
 
 import datetime
 import hashlib
@@ -80,7 +80,7 @@ def make_request(method: str,
                  service: str,
                  region: str,
                  uri: str,
-                 headers: Dict[str, str],
+                 headers: MutableMapping[str, str],
                  data: Union[str, bytes],
                  access_key: str,
                  secret_key: str,
@@ -190,7 +190,7 @@ def remove_default_port(parsed_url):
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
-        headers: Mapping[str, str],
+        headers: MutableMapping[str, str],
         port,
         host,
         amzdate,
