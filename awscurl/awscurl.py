@@ -19,7 +19,7 @@ from botocore import crt, awsrequest
 from botocore.credentials import Credentials
 from typing import Dict
 import urllib
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 from urllib3.util.ssl_ import create_urllib3_context
 
 import configparser
@@ -469,13 +469,27 @@ def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min,
             __log('\nFOLLOWING REDIRECT (unsigned)+++++++++++++++++++++++++++')
             __log('Redirect URL = ' + redirect_url)
 
+            # Resolve relative redirect targets against the response URL
+            # to avoid MissingSchema errors (e.g. Location: /login)
+            redirect_url = urljoin(response.url, redirect_url)
+
             # Follow redirect WITHOUT signing (important for presigned URLs)
             # Strip only Authorization and AWS signing headers, keep user headers
             redirect_headers = {k: v for k, v in headers.items() if k not in
                                 ('Authorization', 'x-amz-date',
                                  'x-amz-content-sha256', 'x-amz-security-token')}
 
-            response = requests.request('GET', redirect_url, headers=redirect_headers,
+            # 301/302/303: follow with GET (303 explicitly changes method to GET)
+            # 307/308: preserve original method and body
+            if response.status_code in (301, 302, 303):
+                follow_method = 'GET'
+                follow_data = None
+            else:  # 307, 308
+                follow_method = method
+                follow_data = data
+
+            response = requests.request(follow_method, redirect_url,
+                                        headers=redirect_headers, data=follow_data,
                                         verify=verify, allow_redirects=True)
 
             __log('\nREDIRECT RESPONSE++++++++++++++++++++++++++++++++++++')
