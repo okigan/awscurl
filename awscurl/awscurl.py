@@ -4,7 +4,7 @@ Awscurl implementation
 """
 from __future__ import print_function
 
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Mapping, Optional, Tuple, Union
 
 import datetime
 import hashlib
@@ -190,7 +190,7 @@ def remove_default_port(parsed_url):
 # pylint: disable=too-many-arguments,too-many-locals
 def task_1_create_a_canonical_request(
         query,
-        headers: Dict,
+        headers: Mapping[str, str],
         port,
         host,
         amzdate,
@@ -221,9 +221,9 @@ def task_1_create_a_canonical_request(
 
     # If the host was specified in the HTTP header, ensure that the canonical
     # headers are set accordingly
-    headers = requests.structures.CaseInsensitiveDict(headers)  # type: ignore[assignment]
-    if 'host' in headers:
-        fullhost = headers['host']
+    ci_headers = requests.structures.CaseInsensitiveDict(headers)
+    if 'host' in ci_headers:
+        fullhost = ci_headers['host']
     else:
         fullhost = host + ':' + port if port else host
 
@@ -243,8 +243,8 @@ def task_1_create_a_canonical_request(
     if security_token:
         canonical_headers_dict['x-amz-security-token'] = security_token
 
-    if 'content-type' in headers:
-        canonical_headers_dict['content-type'] = headers['content-type'].strip()
+    if 'content-type' in ci_headers:
+        canonical_headers_dict['content-type'] = ci_headers['content-type'].strip()
 
     # Step 6: Create the list of signed headers. This lists the headers
     # in the canonical_headers list, delimited with ";" and in alpha order.
@@ -256,7 +256,7 @@ def task_1_create_a_canonical_request(
 
     # Step 6.5: Add custom signed headers into the canonical_headers and signed_headers lists.
     # Header names must be lowercase, values trimmed, and sorted in ASCII order.
-    for header, value in sorted(headers.items()):
+    for header, value in sorted(ci_headers.items()):
         if header.lower().startswith("x-amz-"):
             canonical_headers_dict[header.lower()] = value.strip()
 
@@ -620,8 +620,7 @@ def inner_main(argv: List[str]) -> int:
         del args.security_token
 
     # pylint: disable=deprecated-lambda
-    headers = {k: v for (k, v) in map(lambda s: s.split(": "), args.header)}
-    headers = CaseInsensitiveDict(headers)  # type: ignore[assignment]
+    headers = CaseInsensitiveDict({k: v for (k, v) in map(lambda s: s.split(": "), args.header)})
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
     args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,
