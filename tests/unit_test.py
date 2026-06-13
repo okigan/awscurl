@@ -477,8 +477,7 @@ class TestBinaryResponseOutput(TestCase):
     """
 
     @patch('awscurl.awscurl.__send_request')
-    @patch('builtins.open', side_effect=open)  # type: ignore[arg-type]
-    def test_binary_response_content_preserved_in_output(self, mocked_open, mocked_request) -> None:
+    def test_binary_response_content_preserved_in_output(self, mocked_request) -> None:
         """Binary response content (with non-UTF-8 bytes) should be written as raw bytes."""
         # Simulate a gzip file: 0x1f 0x8b are gzip magic bytes
         # 0x91 is NOT valid UTF-8 start byte
