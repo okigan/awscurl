@@ -181,7 +181,7 @@ uses `default`.
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=okigan/awscurl)](https://star-history.com/#okigan/awscurl&Date)
+[![Star History Chart](https://star-history.dera.page/svg?repos=okigan/awscurl)](https://star-history.dera.page/#okigan/awscurl&Date)
 
 ## Related projects
 
