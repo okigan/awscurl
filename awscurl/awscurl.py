@@ -551,6 +551,9 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
         if botocore:
             import botocore.session
             session = botocore.session.get_session()
+            # 'default' is left to botocore so env/instance credentials still work without a config file (#122)
+            if profile and profile != 'default':
+                session.set_config_variable('profile', profile)
             cred = session.get_credentials()
             access_key, secret_key, security_token = cred.access_key, cred.secret_key, cred.token
 
