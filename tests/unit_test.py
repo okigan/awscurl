@@ -3,6 +3,7 @@
 # mypy: disable-error-code="arg-type"
 
 import datetime
+import hashlib
 import json
 import sys
 from types import SimpleNamespace
@@ -15,12 +16,12 @@ try:
 except ImportError:
     from unittest.mock import patch
 
-from awscurl.awscurl import aws_url_encode, make_request, parse_data
+from awscurl.awscurl import aws_url_encode, inner_main, make_request, parse_data, parse_header
 
 from requests.exceptions import SSLError
 from requests import Response
 
-from io import StringIO
+from io import BytesIO, StringIO
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
@@ -63,6 +64,22 @@ def my_mock_utcnow() -> Any:
     def ss(*args: Any, **kargs: Any) -> datetime.datetime:
         print("in mock")
         return datetime.datetime.fromtimestamp(0, tz=datetime.timezone.utc)
+
+    return ss
+
+
+captured_send_request: dict = {}
+
+
+def my_mock_send_request_capture() -> Any:
+    """Mock __send_request that records the signed headers and returns a real Response."""
+    def ss(uri: Any, data: Any, headers: Any, method: Any, *args: Any, **kargs: Any) -> Response:
+        captured_send_request['headers'] = dict(headers)
+        response = Response()
+        response.status_code = 200
+        response._content = b'ok'
+        response.encoding = 'UTF-8'
+        return response
 
     return ss
 
@@ -557,3 +574,114 @@ class TestBinaryResponseOutput(TestCase):
         self.assertEqual(r.content[4], 0xff)
         # Byte 0xab at position 5 is invalid UTF-8 - must be preserved
         self.assertEqual(r.content[5], 0xab)
+
+
+class TestParseHeader(TestCase):
+    maxDiff = None
+
+    def test_parses_standard_form(self):
+        self.assertEqual(parse_header('Accept: application/xml'),
+                         ('Accept', 'application/xml'))
+
+    def test_parses_no_space_form(self):
+        # regression: 'Content-Type:application/xml' crashed with
+        # ValueError ("not enough values to unpack") under s.split(": ")
+        self.assertEqual(parse_header('Content-Type:application/xml'),
+                         ('Content-Type', 'application/xml'))
+
+    def test_keeps_multi_colon_value(self):
+        # regression: 'X-Api: v1: sub' crashed with ValueError
+        # ("too many values to unpack") under s.split(": ")
+        self.assertEqual(parse_header('X-Api: v1: sub'), ('X-Api', 'v1: sub'))
+
+    def test_strips_name_and_value(self):
+        self.assertEqual(parse_header('  X-Name :  value  '), ('X-Name', 'value'))
+
+    def test_fragment_without_colon_raises(self):
+        with self.assertRaises(ValueError):
+            parse_header('no-colon-here')
+
+    def test_empty_name_raises(self):
+        with self.assertRaises(ValueError):
+            parse_header(': value')
+
+
+class TestInnerMainMalformedHeader(TestCase):
+    maxDiff = None
+
+    def test_garbage_header_exits_2_without_traceback(self):
+        # regression: a fragment with no colon crashed with a raw ValueError
+        # traceback; it must exit 2 through the argparse error path instead
+        stderr = StringIO()
+        with patch('sys.stderr', stderr):
+            with self.assertRaises(SystemExit) as ctx:
+                inner_main(['-H', 'no-colon-here', 'https://example.com'])
+        self.assertEqual(ctx.exception.code, 2)
+        self.assertIn('invalid header', stderr.getvalue())
+        self.assertNotIn('Traceback', stderr.getvalue())
+
+
+class TestInnerMainHeaderParsing(TestCase):
+    maxDiff = None
+
+    @patch('requests.get', new_callable=my_mock_get)
+    @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request_capture)
+    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
+    def test_no_space_and_multi_colon_headers_reach_request(self, *args: Any, **kvargs: Any):
+        captured_send_request.clear()
+        exit_code = inner_main([
+            '-H', 'Content-Type:application/xml',
+            '-H', 'X-Api: v1: sub',
+            '--access_key', 'AKIDEXAMPLE',
+            '--secret_key', 'secret',
+            '--session_token', '',
+            '--service', 'ec2',
+            '--region', 'us-east-1',
+            'https://example.com/path',
+        ])
+        self.assertEqual(exit_code, 0)
+        headers = captured_send_request['headers']
+        self.assertEqual(headers['Content-Type'], 'application/xml')
+        self.assertEqual(headers['X-Api'], 'v1: sub')
+
+
+class TestMakeRequestWithTextDataAndBinaryFlag(TestCase):
+    maxDiff = None
+
+    @patch('requests.get', new_callable=my_mock_get)
+    @patch('awscurl.awscurl.__send_request', new_callable=my_mock_send_request)
+    @patch('awscurl.awscurl.__now', new_callable=my_mock_utcnow)
+    def test_make_request(self, *args: Any, **kvargs: Any):
+        # regression: str data with --data-binary raised
+        # TypeError ("Strings must be encoded before hashing")
+        headers: dict[str, str] = {}
+        params = {'method': 'GET',
+                  'service': 'ec2',
+                  'region': 'region',
+                  'uri': 'https://user:pass@host:123/path/?a=b&c=d',
+                  'headers': headers,
+                  'data': 'hello',
+                  'access_key': '',
+                  'secret_key': '',
+                  'security_token': '',
+                  'data_binary': True}
+        make_request(**params)
+
+        expected_hash = hashlib.sha256('hello'.encode('utf-8')).hexdigest()
+        self.assertEqual(headers['x-amz-content-sha256'], expected_hash)
+
+
+class TestParseDataBinaryStdin(TestCase):
+    maxDiff = None
+
+    def test_stdin_binary_mode_reads_bytes(self):
+        # regression: '@-' read sys.stdin as text, so binary pipes hit
+        # UnicodeDecodeError even under --data-binary
+        payload = b'\x89PNG\r\n\x1a\n'
+        with patch('sys.stdin', SimpleNamespace(buffer=BytesIO(payload))):
+            self.assertEqual(parse_data('@-', True), payload)
+
+    def test_stdin_text_mode_returns_str(self):
+        text = 'plain text'
+        with patch('sys.stdin', StringIO(text)):
+            self.assertEqual(parse_data('@-', False), text)
