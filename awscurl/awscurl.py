@@ -17,6 +17,7 @@ import re
 
 from botocore import crt, awsrequest
 from botocore.credentials import Credentials
+from botocore.exceptions import ProfileNotFound
 from typing import Dict
 import urllib
 from urllib.parse import quote_from_bytes, unquote_to_bytes, urljoin
@@ -575,7 +576,13 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
             # 'default' is left to botocore so env/instance credentials still work without a config file (#122)
             if profile and profile != 'default':
                 session.set_config_variable('profile', profile)
-            cred = session.get_credentials()
+            try:
+                cred = session.get_credentials()
+            except ProfileNotFound as exception:
+                raise ValueError("The profile '{0}' could not be found.".format(profile)) from exception
+            if cred is None:
+                raise ValueError('No credentials found in environment, shared credential files, '
+                                 'or the instance metadata service.')
             access_key, secret_key, security_token = cred.access_key, cred.secret_key, cred.token
 
     return access_key, secret_key, security_token
@@ -628,10 +635,6 @@ def inner_main(argv: List[str]) -> int:
     """
     Awscurl CLI main entry point
     """
-    # note EC2 ignores Accept header and responds in xml
-    default_headers = ['Accept: application/xml',
-                       'Content-Type: application/json']
-
     parser = configargparse.ArgumentParser(
         description='Curl AWS request signing',
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter
@@ -680,6 +683,21 @@ def inner_main(argv: List[str]) -> int:
 
     if args.verbose:
         __log(redact_secrets(vars(args)))
+
+    try:
+        return _run_request(args, parser)
+    except ValueError as exception:
+        # expected failure modes (missing credentials, unknown profile, malformed
+        # input) exit with a one-line message instead of a traceback
+        print('awscurl: error: {0}'.format(exception), file=sys.stderr)
+        return 1
+
+
+def _run_request(args, parser) -> int:
+    """Build, sign, and send the request described by ``args``; return the CLI exit code."""
+    # note EC2 ignores Accept header and responds in xml
+    default_headers = ['Accept: application/xml',
+                       'Content-Type: application/json']
 
     data = parse_data(args.data, args.data_binary)
     if data is None:

@@ -195,3 +195,72 @@ class TestVerboseOutputRedaction(TestCase):
         self.assertIn('***', output)
         self.assertIn('host', output)
         self.assertIn('x-amz-date', output)
+
+
+MOCK_AWS_ENV = {
+    'AWS_ACCESS_KEY_ID': 'MOCK_AWS_ACCESS_KEY_ID',
+    'AWS_SECRET_ACCESS_KEY': 'MOCK_AWS_SECRET_ACCESS_KEY',
+    'AWS_SESSION_TOKEN': 'MOCK_AWS_SESSION_TOKEN',
+}
+
+
+def mock_aws_env(**overrides):
+    """Patch os.environ with mock AWS_* credentials, clearing any ambient ones.
+
+    Uses the same mock values CI sets (see .github/workflows/pythonapp.yml) and
+    the pattern of _clean_aws_env in tests/load_aws_config_test.py, so tests do
+    not depend on the ambient AWS_* environment.
+    """
+    env = {k: v for k, v in os.environ.items() if not k.startswith('AWS_')}
+    env.update(MOCK_AWS_ENV)
+    env.update(overrides)
+    return mock.patch.dict(os.environ, env, clear=True)
+
+
+def clean_aws_env(**overrides):
+    """Patch os.environ with no AWS_* variables at all (hermetic clean slate)."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith('AWS_')}
+    env.update(overrides)
+    return mock.patch.dict(os.environ, env, clear=True)
+
+
+class TestInnerMainCredentialErrors(TestCase):
+    """Expected credential failures must exit 1 with a one-line stderr message.
+
+    Regression test for the raw AttributeErrors and botocore ProfileNotFound
+    tracebacks the CLI used to crash with.
+    """
+    maxDiff = None
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def test_no_credentials_exits_1_with_clean_error(self):
+        stderr = io.StringIO()
+        # HOME points at an empty dir so no shared credentials file resolves;
+        # IMDS is disabled so the run is fast and deterministic
+        with clean_aws_env(HOME=self.tmp.name, AWS_EC2_METADATA_DISABLED='true'):
+            with redirect_stderr(stderr):
+                result = inner_main(['--service', 's3',
+                                     'https://awscurl-sample-bucket.s3.amazonaws.com'])
+
+        self.assertEqual(result, 1)
+        self.assertIn('awscurl: error: No credentials found', stderr.getvalue())
+
+    def test_unknown_profile_exits_1_with_clean_error(self):
+        aws_dir = os.path.join(self.tmp.name, '.aws')
+        os.makedirs(aws_dir)
+        with open(os.path.join(aws_dir, 'credentials'), 'w') as f:
+            f.write('[default]\n'
+                    'aws_access_key_id = default_access_key\n'
+                    'aws_secret_access_key = default_secret_key\n')
+
+        stderr = io.StringIO()
+        with clean_aws_env(HOME=self.tmp.name):
+            with redirect_stderr(stderr):
+                result = inner_main(['--profile', 'no-such-profile', '--service', 's3',
+                                     'https://awscurl-sample-bucket.s3.amazonaws.com'])
+
+        self.assertEqual(result, 1)
+        self.assertIn("The profile 'no-such-profile' could not be found", stderr.getvalue())
