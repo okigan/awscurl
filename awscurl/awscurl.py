@@ -232,7 +232,12 @@ def task_1_create_a_canonical_request(
     # Step 4: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
     # Only use binary hash if data is present AND data_binary flag is set.
-    payload_hash = sha256_hash_for_binary_data(data) if (data_binary and data) else sha256_hash(data or '')
+    # --data-binary hashes raw bytes: str payloads (-d "text") are signed as
+    # their utf-8 encoding instead of raising TypeError inside hashlib
+    payload_hash = (
+        sha256_hash_for_binary_data(data.encode('utf-8') if isinstance(data, str) else data)
+        if (data_binary and data)
+        else sha256_hash(data or ''))
 
     # Step 5: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
@@ -581,6 +586,9 @@ def parse_data(data: Optional[str], binary: bool) -> Optional[Union[str, bytes]]
 
     # if data is the stdin `@-` identifier, read from stdin
     if data == "@-":
+        # binary mode reads raw bytes so binary payloads survive the pipe
+        if binary:
+            return sys.stdin.buffer.read()
         return sys.stdin.read()
 
     # otherwise read from the file
@@ -588,6 +596,16 @@ def parse_data(data: Optional[str], binary: bool) -> Optional[Union[str, bytes]]
     read_mode = "rb" if binary else "r"
     with open(filename, read_mode) as post_data_file:
         return post_data_file.read()
+
+
+def parse_header(raw: str) -> Tuple[str, str]:
+    """
+    Parse a 'Name: value' fragment on the first colon (curl accepts 'Name:value' too).
+    """
+    name, sep, value = raw.partition(":")
+    if not sep or not name.strip():
+        raise ValueError('invalid header %r: expected \'Name: value\'' % raw)
+    return name.strip(), value.strip()
 
 
 def inner_main(argv: List[str]) -> int:
@@ -658,8 +676,10 @@ def inner_main(argv: List[str]) -> int:
         args.session_token = args.security_token
         del args.security_token
 
-    # pylint: disable=deprecated-lambda
-    headers = CaseInsensitiveDict({k: v for (k, v) in map(lambda s: s.split(": "), args.header)})
+    try:
+        headers = CaseInsensitiveDict(parse_header(h) for h in args.header)
+    except ValueError as e:
+        parser.error(str(e))  # argparse error path: one-line message, exit 2, no traceback
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
     args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,
