@@ -35,6 +35,22 @@ __author__ = 'iokulist'
 
 IS_VERBOSE = False
 
+# Credential material that must never reach verbose output
+# (AGENTS.md: never log or expose AWS credentials)
+SENSITIVE_KEYS = frozenset(['access_key', 'secret_key', 'session_token', 'security_token'])
+SENSITIVE_HEADERS = frozenset(['authorization', 'x-amz-security-token'])
+REDACTED_VALUE = '***'
+
+
+def redact_secrets(record: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return a copy of ``record`` with credential values fully masked.
+
+    Values are replaced wholesale with '***' -- never truncated to a partial secret.
+    """
+    sensitive = SENSITIVE_KEYS | SENSITIVE_HEADERS
+    return {key: (REDACTED_VALUE if key.lower() in sensitive else value)
+            for key, value in record.items()}
+
 
 TLS_VERSIONS = {
     "1.0": ssl.TLSVersion.TLSv1,
@@ -442,7 +458,7 @@ class _TLSAdapter(HTTPAdapter):
 
 def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
-    __log(headers)
+    __log(redact_secrets(headers))
 
     __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
     __log('Request URL = ' + uri)
@@ -663,7 +679,7 @@ def inner_main(argv: List[str]) -> int:
     IS_VERBOSE = args.verbose
 
     if args.verbose:
-        __log(vars(args))
+        __log(redact_secrets(vars(args)))
 
     data = parse_data(args.data, args.data_binary)
     if data is None:

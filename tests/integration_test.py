@@ -2,11 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import base64
+import io
+import socket
+import tempfile
 
-from unittest import TestCase
+from unittest import TestCase, mock
+from contextlib import redirect_stderr
 
 import sys
 import os
+
+import requests
 
 # this block resolves issues with pytest/tox, overall project dir structure
 # should be updated, some hints at can be found here: 
@@ -148,3 +154,44 @@ class TestInnerMainMethodEmptyCredentials(TestCase):
                         'https://awscurl-sample-bucket.s3.amazonaws.com']),
             22
         )
+
+
+class TestVerboseOutputRedaction(TestCase):
+    """Verbose output must never contain credential values (AGENTS.md: never log AWS credentials).
+
+    Regression test for the -v credential leak: the args dump in inner_main and the
+    header dump in __send_request both carried full secrets.
+    """
+    maxDiff = None
+
+    def test_verbose_output_masks_credentials(self):
+        access_key = 'AKIAIOSFODNN7EXAMPLE'
+        secret_key = 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
+
+        # Bind (but never listen on) a local port so the request fails fast with
+        # ConnectionError after both verbose log sites have run - no live network needed
+        probe = socket.socket()
+        probe.bind(('127.0.0.1', 0))
+        port = probe.getsockname()[1]
+        uri = 'https://127.0.0.1:{0}/awscurl-sample-file'.format(port)
+
+        stderr = io.StringIO()
+        try:
+            with redirect_stderr(stderr):
+                with self.assertRaises(requests.exceptions.ConnectionError):
+                    inner_main(['--verbose', '--access_key', access_key, '--secret_key', secret_key,
+                                '--service', 's3', uri])
+        finally:
+            probe.close()
+
+        output = stderr.getvalue()
+        # no credential value may appear anywhere in verbose output
+        self.assertNotIn(access_key, output)
+        self.assertNotIn(secret_key, output)
+        # the Authorization header is masked wholesale ('Credential=' only appears
+        # in a leaked Authorization value)
+        self.assertNotIn('Credential=', output)
+        # masking happened, and the useful debugging output is intact
+        self.assertIn('***', output)
+        self.assertIn('host', output)
+        self.assertIn('x-amz-date', output)
