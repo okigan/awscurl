@@ -590,6 +590,16 @@ def parse_data(data: Optional[str], binary: bool) -> Optional[Union[str, bytes]]
         return post_data_file.read()
 
 
+def parse_header(raw: str) -> Tuple[str, str]:
+    """
+    Parse a 'Name: value' fragment on the first colon (curl accepts 'Name:value' too).
+    """
+    name, sep, value = raw.partition(":")
+    if not sep or not name.strip():
+        raise ValueError('invalid header %r: expected \'Name: value\'' % raw)
+    return name.strip(), value.strip()
+
+
 def inner_main(argv: List[str]) -> int:
     """
     Awscurl CLI main entry point
@@ -658,8 +668,10 @@ def inner_main(argv: List[str]) -> int:
         args.session_token = args.security_token
         del args.security_token
 
-    # pylint: disable=deprecated-lambda
-    headers = CaseInsensitiveDict({k: v for (k, v) in map(lambda s: s.split(": "), args.header)})
+    try:
+        headers = CaseInsensitiveDict(parse_header(h) for h in args.header)
+    except ValueError as e:
+        parser.error(str(e))  # argparse error path: one-line message, exit 2, no traceback
 
     credentials_path = os.path.expanduser("~") + "/.aws/credentials"
     args.access_key, args.secret_key, args.session_token = load_aws_config(args.access_key,
