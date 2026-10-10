@@ -126,34 +126,46 @@ class TestMakeRequestWithTokenAndNonEnglishData(TestCase):
 class TestInnerMainMethod(TestCase):
     maxDiff = None
 
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
     def test_exit_code_without_fail_option(self, *args, **kwargs):
-        self.assertEqual(
-            inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
-            0
-        )
+        with mock_aws_env(HOME=self.tmp.name):
+            self.assertEqual(
+                inner_main(['--verbose', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
+                0
+            )
 
     def test_exit_code_with_fail_option(self, *args, **kwargs):
-        self.assertEqual(
-            inner_main(['--verbose', '--fail-with-body', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
-            22
-        )
+        with mock_aws_env(HOME=self.tmp.name):
+            self.assertEqual(
+                inner_main(['--verbose', '--fail-with-body', '--service', 's3', 'https://awscurl-sample-bucket.s3.amazonaws.com']),
+                22
+            )
 
 class TestInnerMainMethodEmptyCredentials(TestCase):
     maxDiff = None
 
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
     def test_exit_code_without_fail_option(self, *args, **kwargs):
-        self.assertEqual(
-            inner_main(['--verbose', '--access_key', '', '--secret_key', '', '--session_token', '', '--service', 's3',
-                        'https://awscurl-sample-bucket.s3.amazonaws.com']),
-            0
-        )
+        with mock_aws_env(HOME=self.tmp.name):
+            self.assertEqual(
+                inner_main(['--verbose', '--access_key', '', '--secret_key', '', '--session_token', '', '--service', 's3',
+                            'https://awscurl-sample-bucket.s3.amazonaws.com']),
+                0
+            )
 
     def test_exit_code_with_fail_option(self, *args, **kwargs):
-        self.assertEqual(
-            inner_main(['--verbose', '--fail-with-body', '--access_key', '', '--secret_key', '', '--session_token', '', '--service', 's3',
-                        'https://awscurl-sample-bucket.s3.amazonaws.com']),
-            22
-        )
+        with mock_aws_env(HOME=self.tmp.name):
+            self.assertEqual(
+                inner_main(['--verbose', '--fail-with-body', '--access_key', '', '--secret_key', '', '--session_token', '', '--service', 's3',
+                            'https://awscurl-sample-bucket.s3.amazonaws.com']),
+                22
+            )
 
 
 class TestVerboseOutputRedaction(TestCase):
