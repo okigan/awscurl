@@ -232,7 +232,12 @@ def task_1_create_a_canonical_request(
     # Step 4: Create payload hash (hash of the request body content). For GET
     # requests, the payload is an empty string ("").
     # Only use binary hash if data is present AND data_binary flag is set.
-    payload_hash = sha256_hash_for_binary_data(data) if (data_binary and data) else sha256_hash(data or '')
+    # --data-binary hashes raw bytes: str payloads (-d "text") are signed as
+    # their utf-8 encoding instead of raising TypeError inside hashlib
+    payload_hash = (
+        sha256_hash_for_binary_data(data.encode('utf-8') if isinstance(data, str) else data)
+        if (data_binary and data)
+        else sha256_hash(data or ''))
 
     # Step 5: Create the canonical headers and signed headers. Header names
     # and value must be trimmed and lowercase, and sorted in ASCII order.
@@ -581,6 +586,9 @@ def parse_data(data: Optional[str], binary: bool) -> Optional[Union[str, bytes]]
 
     # if data is the stdin `@-` identifier, read from stdin
     if data == "@-":
+        # binary mode reads raw bytes so binary payloads survive the pipe
+        if binary:
+            return sys.stdin.buffer.read()
         return sys.stdin.read()
 
     # otherwise read from the file
