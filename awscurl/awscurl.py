@@ -17,6 +17,7 @@ import re
 
 from botocore import crt, awsrequest
 from botocore.credentials import Credentials
+from botocore.exceptions import ProfileNotFound
 from typing import Dict
 import urllib
 from urllib.parse import quote_from_bytes, unquote_to_bytes, urljoin
@@ -34,6 +35,22 @@ from .utils import sha256_hash, sha256_hash_for_binary_data, sign
 __author__ = 'iokulist'
 
 IS_VERBOSE = False
+
+# Credential material that must never reach verbose output
+# (AGENTS.md: never log or expose AWS credentials)
+SENSITIVE_KEYS = frozenset(['access_key', 'secret_key', 'session_token', 'security_token'])
+SENSITIVE_HEADERS = frozenset(['authorization', 'x-amz-security-token'])
+REDACTED_VALUE = '***'
+
+
+def redact_secrets(record: Mapping[str, Any]) -> Dict[str, Any]:
+    """Return a copy of ``record`` with credential values fully masked.
+
+    Values are replaced wholesale with '***' -- never truncated to a partial secret.
+    """
+    sensitive = SENSITIVE_KEYS | SENSITIVE_HEADERS
+    return {key: (REDACTED_VALUE if key.lower() in sensitive else value)
+            for key, value in record.items()}
 
 
 TLS_VERSIONS = {
@@ -442,7 +459,7 @@ class _TLSAdapter(HTTPAdapter):
 
 def __send_request(uri, data, headers, method, verify, allow_redirects, tls_min, tls_max):
     __log('\nHEADERS++++++++++++++++++++++++++++++++++++')
-    __log(headers)
+    __log(redact_secrets(headers))
 
     __log('\nBEGIN REQUEST++++++++++++++++++++++++++++++++++++')
     __log('Request URL = ' + uri)
@@ -559,7 +576,13 @@ def load_aws_config(access_key, secret_key, security_token, credentials_path, pr
             # 'default' is left to botocore so env/instance credentials still work without a config file (#122)
             if profile and profile != 'default':
                 session.set_config_variable('profile', profile)
-            cred = session.get_credentials()
+            try:
+                cred = session.get_credentials()
+            except ProfileNotFound as exception:
+                raise ValueError("The profile '{0}' could not be found.".format(profile)) from exception
+            if cred is None:
+                raise ValueError('No credentials found in environment, shared credential files, '
+                                 'or the instance metadata service.')
             access_key, secret_key, security_token = cred.access_key, cred.secret_key, cred.token
 
     return access_key, secret_key, security_token
@@ -612,10 +635,6 @@ def inner_main(argv: List[str]) -> int:
     """
     Awscurl CLI main entry point
     """
-    # note EC2 ignores Accept header and responds in xml
-    default_headers = ['Accept: application/xml',
-                       'Content-Type: application/json']
-
     parser = configargparse.ArgumentParser(
         description='Curl AWS request signing',
         formatter_class=configargparse.ArgumentDefaultsHelpFormatter
@@ -663,7 +682,22 @@ def inner_main(argv: List[str]) -> int:
     IS_VERBOSE = args.verbose
 
     if args.verbose:
-        __log(vars(args))
+        __log(redact_secrets(vars(args)))
+
+    try:
+        return _run_request(args, parser)
+    except ValueError as exception:
+        # expected failure modes (missing credentials, unknown profile, malformed
+        # input) exit with a one-line message instead of a traceback
+        print('awscurl: error: {0}'.format(exception), file=sys.stderr)
+        return 1
+
+
+def _run_request(args, parser) -> int:
+    """Build, sign, and send the request described by ``args``; return the CLI exit code."""
+    # note EC2 ignores Accept header and responds in xml
+    default_headers = ['Accept: application/xml',
+                       'Content-Type: application/json']
 
     data = parse_data(args.data, args.data_binary)
     if data is None:

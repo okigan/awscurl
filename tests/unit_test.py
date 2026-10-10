@@ -16,7 +16,7 @@ try:
 except ImportError:
     from unittest.mock import patch
 
-from awscurl.awscurl import aws_url_encode, inner_main, make_request, parse_data, parse_header
+from awscurl.awscurl import aws_url_encode, inner_main, make_request, parse_data, parse_header, redact_secrets
 
 from requests.exceptions import SSLError
 from requests import Response
@@ -685,3 +685,36 @@ class TestParseDataBinaryStdin(TestCase):
         text = 'plain text'
         with patch('sys.stdin', StringIO(text)):
             self.assertEqual(parse_data('@-', False), text)
+
+
+class TestRedactSecrets(TestCase):
+    maxDiff = None
+
+    def test_masks_credential_keys_wholesale(self):
+        record = {'access_key': 'AKIAEXAMPLE',
+                  'secret_key': 'SHHH',
+                  'session_token': 'TOK',
+                  'security_token': 'TOK2',
+                  'Authorization': 'AWS4-HMAC-SHA256 Credential=AKIAEXAMPLE/20260101/us-east-1/s3/aws4_request',
+                  'x-amz-security-token': 'TOK3',
+                  'host': 'example.com',
+                  'x-amz-date': '20261010T000000Z'}
+
+        redacted = redact_secrets(record)
+
+        for key in ('access_key', 'secret_key', 'session_token', 'security_token',
+                    'Authorization', 'x-amz-security-token'):
+            self.assertEqual(redacted[key], '***')
+        # debugging output stays intact
+        self.assertEqual(redacted['host'], 'example.com')
+        self.assertEqual(redacted['x-amz-date'], '20261010T000000Z')
+        # the input record is not mutated
+        self.assertEqual(record['secret_key'], 'SHHH')
+
+    def test_masks_case_insensitively(self):
+        redacted = redact_secrets({'ACCESS_KEY': 'AKIAEXAMPLE',
+                                   'X-Amz-Security-Token': 'TOK',
+                                   'content-type': 'application/json'})
+        self.assertEqual(redacted['ACCESS_KEY'], '***')
+        self.assertEqual(redacted['X-Amz-Security-Token'], '***')
+        self.assertEqual(redacted['content-type'], 'application/json')
