@@ -461,7 +461,8 @@ def aws_url_encode(text: str) -> str:
 
 
 def __now():
-    return datetime.datetime.utcnow()
+    # timezone-aware: datetime.utcnow() is deprecated (3.12+) and scheduled for removal
+    return datetime.datetime.now(datetime.timezone.utc)
 
 
 class _TLSAdapter(HTTPAdapter):
