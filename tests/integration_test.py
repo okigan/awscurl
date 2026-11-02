@@ -144,6 +144,7 @@ class TestInnerMainMethod(TestCase):
                 22
             )
 
+
 class TestInnerMainMethodEmptyCredentials(TestCase):
     maxDiff = None
 
