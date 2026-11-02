@@ -16,7 +16,9 @@ try:
 except ImportError:
     from unittest.mock import patch
 
-from awscurl.awscurl import aws_url_encode, inner_main, make_request, parse_data, parse_header, redact_secrets
+from awscurl.awscurl import (aws_url_encode, inner_main, make_request, parse_data,
+                             parse_header, redact_canonical_request, redact_secrets,
+                             task_1_create_a_canonical_request)
 
 from requests.exceptions import SSLError
 from requests import Response
@@ -718,3 +720,52 @@ class TestRedactSecrets(TestCase):
         self.assertEqual(redacted['ACCESS_KEY'], '***')
         self.assertEqual(redacted['X-Amz-Security-Token'], '***')
         self.assertEqual(redacted['content-type'], 'application/json')
+
+    def test_masks_credentials_inside_header_fragments(self):
+        # args.header is a list of raw 'Name: value' strings
+        redacted = redact_secrets({'header': ['X-Amz-Security-Token: TOK',
+                                              'Authorization: AWS4-HMAC-SHA256 Credential=AKIAEXAMPLE',
+                                              'Accept: application/xml'],
+                                   'uri': 'https://example.com/x?a=1'})
+        self.assertEqual(redacted['header'],
+                         ['X-Amz-Security-Token: ***',
+                          'Authorization: ***',
+                          'Accept: application/xml'])
+        self.assertEqual(redacted['uri'], 'https://example.com/x?a=1')
+
+
+class TestRedactCanonicalRequest(TestCase):
+    maxDiff = None
+
+    canonical = ('GET\n/x\na=1\n'
+                 'host:example.com\n'
+                 'x-amz-security-token:TOKENVALUE\n'
+                 '\nhost;x-amz-security-token\n'
+                 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
+
+    def test_token_is_masked_in_the_logged_copy(self):
+        logged = redact_canonical_request(self.canonical, 'TOKENVALUE')
+        self.assertNotIn('TOKENVALUE', logged)
+        self.assertIn('x-amz-security-token:***\n', logged)
+        # everything else stays readable for debugging
+        self.assertIn('host:example.com', logged)
+
+    def test_no_token_means_no_change(self):
+        self.assertEqual(redact_canonical_request(self.canonical, None), self.canonical)
+        self.assertEqual(redact_canonical_request(self.canonical, ''), self.canonical)
+
+    def test_signed_canonical_request_is_not_masked(self):
+        # masking must happen only in the verbose log, never in what gets signed
+        captured = {}
+
+        def fake_log(*args: Any, **kwargs: Any) -> None:
+            captured.setdefault('logged', []).append(args)
+
+        with patch('awscurl.awscurl.__log', side_effect=fake_log):
+            canonical_request, _payload, _signed = task_1_create_a_canonical_request(
+                'a=1', {}, None, 'example.com', '20261010T000000Z', 'GET', '',
+                'TOKENVALUE', False, '/x')
+
+        self.assertIn('x-amz-security-token:TOKENVALUE\n', canonical_request)
+        logged_text = ' '.join(str(a) for group in captured['logged'] for a in group)
+        self.assertNotIn('TOKENVALUE', logged_text)

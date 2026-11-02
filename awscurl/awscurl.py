@@ -43,14 +43,47 @@ SENSITIVE_HEADERS = frozenset(['authorization', 'x-amz-security-token'])
 REDACTED_VALUE = '***'
 
 
+def redact_header(raw: str) -> str:
+    """Mask the value of a 'Name: value' fragment when the name is credential material.
+
+    Used for CLI ``-H`` values, which arrive as unparsed strings and would otherwise
+    be echoed verbatim by ``--verbose``.
+    """
+    name, sep, _ = raw.partition(":")
+    if sep and name.strip().lower() in SENSITIVE_HEADERS:
+        return '{0}: {1}'.format(name.strip(), REDACTED_VALUE)
+    return raw
+
+
 def redact_secrets(record: Mapping[str, Any]) -> Dict[str, Any]:
     """Return a copy of ``record`` with credential values fully masked.
 
     Values are replaced wholesale with '***' -- never truncated to a partial secret.
+    List values (such as the raw ``-H`` fragments) are redacted element by element.
     """
     sensitive = SENSITIVE_KEYS | SENSITIVE_HEADERS
-    return {key: (REDACTED_VALUE if key.lower() in sensitive else value)
-            for key, value in record.items()}
+    redacted: Dict[str, Any] = {}
+    for key, value in record.items():
+        if key.lower() in sensitive:
+            redacted[key] = REDACTED_VALUE
+        elif isinstance(value, (list, tuple)):
+            redacted[key] = [redact_header(item) if isinstance(item, str) else item
+                             for item in value]
+        else:
+            redacted[key] = value
+    return redacted
+
+
+def redact_canonical_request(canonical_request: str, security_token: Optional[str]) -> str:
+    """Mask the session token inside the verbose canonical-request dump.
+
+    The canonical request that is actually signed is returned unchanged by
+    ``task_1_create_a_canonical_request``; only the logged copy is masked.
+    """
+    if not security_token:
+        return canonical_request
+    return canonical_request.replace('x-amz-security-token:' + security_token + '\n',
+                                     'x-amz-security-token:' + REDACTED_VALUE + '\n')
 
 
 TLS_VERSIONS = {
@@ -295,7 +328,7 @@ def task_1_create_a_canonical_request(
                          signed_headers + '\n' +
                          payload_hash)
 
-    __log('\nCANONICAL REQUEST = ' + canonical_request)
+    __log('\nCANONICAL REQUEST = ' + redact_canonical_request(canonical_request, security_token))
     return canonical_request, payload_hash, signed_headers
 
 
