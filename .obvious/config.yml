@@ -1,0 +1,15 @@
+# .obvious/config.yml — repo policy for okigan/awscurl
+# Auto-detected from GitHub settings on 2026-10-09.
+default_branch: master
+
+branches:
+  # Setup/onboarding PRs and agent work branch off the default branch.
+  base: master
+
+merge:
+  # GitHub allows merge commit, squash, and rebase; squash chosen as the
+  # least noisy default. TODO(confirm) preferred method with maintainer.
+  method: squash
+  # Setup PR is a human review gate: never self-approve; platform submits
+  # the merge once the PR is merge-ready and human approval is given.
+  requireHumanMerge: true
