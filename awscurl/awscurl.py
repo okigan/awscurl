@@ -438,13 +438,14 @@ def get_sigv4a_headers(service, region, method, url, access_key, secret_key, sec
 
 
 def __normalize_query_string(query):
-    parameter_pairs = (list(map(str.strip, s.split("=", 1)))
-                       for s in query.split('&')
-                       if len(s) > 0)
+    parameter_pairs = []
+    for segment in query.split('&'):
+        if segment:
+            key, _, value = segment.partition('=')
+            parameter_pairs.append((key.strip(), value.strip()))
+    parameter_pairs.sort()
 
-    normalized = '&'.join('%s=%s' % (aws_url_encode(p[0]), aws_url_encode(p[1]) if len(p) > 1 else '')
-                          for p in sorted(parameter_pairs))
-    return normalized
+    return '&'.join([f'{aws_url_encode(key)}={aws_url_encode(value)}' for key, value in parameter_pairs])
 
 
 def aws_url_encode(text: str) -> str:
@@ -457,7 +458,13 @@ def aws_url_encode(text: str) -> str:
       extended UTF-8 characters must be in the form %XY%ZA%BC.
     - Percent-encode all other characters including equals (=).
     """
-    return quote_from_bytes(unquote_to_bytes(text), safe='~')
+    if type(text) is str and '%' not in text:
+        if not text.rstrip('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~'):
+            return text
+        raw = text.encode()
+    else:
+        raw = unquote_to_bytes(text)
+    return quote_from_bytes(raw, safe='~')
 
 
 def __now():
